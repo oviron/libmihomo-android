@@ -185,13 +185,14 @@ func applyConfig(params *SetupParams) error {
 		raw, uerr = config.UnmarshalRawConfig(buf)
 	}
 	if raw != nil {
+		// Snapshot YAML group order before ParseRawConfig — it calls
+		// proxyGroupsDagSort which reorders raw.ProxyGroup in place.
+		captureProxyGroupOrder(raw)
 		currentConfig, perr = config.ParseRawConfig(raw)
 	}
 	if currentConfig == nil {
 		currentConfig, _ = config.ParseRawConfig(config.DefaultRawConfig())
 	}
-
-	captureProxyGroupOrder(raw)
 	// executor.ApplyConfig(force=true) runs mihomo's own updateListeners,
 	// so our local updateListeners is redundant here (it stays useful for
 	// the partial-update path in updateConfig).
@@ -208,16 +209,19 @@ func applyConfig(params *SetupParams) error {
 	}
 }
 
-// captureProxyGroupOrder snapshots YAML-declared group order because mihomo's
-// parsed Config drops it. An empty snapshot is published when raw is nil.
+// Keep last good order on nil/empty: UI falls back to alphabetical otherwise.
 func captureProxyGroupOrder(raw *config.RawConfig) {
-	order := []string{}
-	if raw != nil {
-		for _, g := range raw.ProxyGroup {
-			if name, ok := g["name"].(string); ok && name != "" {
-				order = append(order, name)
-			}
+	if raw == nil {
+		return
+	}
+	order := make([]string, 0, len(raw.ProxyGroup))
+	for _, g := range raw.ProxyGroup {
+		if name, ok := g["name"].(string); ok && name != "" {
+			order = append(order, name)
 		}
+	}
+	if len(order) == 0 {
+		return
 	}
 	proxyGroupOrderMu.Lock()
 	proxyGroupOrder = order
