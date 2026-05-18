@@ -18,8 +18,16 @@ cd "$(dirname "$0")"
 
 : "${ANDROID_NDK:?ANDROID_NDK must point at an NDK 28+ install}"
 GO_TAGS="${GO_TAGS:-with_gvisor,cmfa}"
-GO_LDFLAGS="${GO_LDFLAGS:--w -s}"
+# Reproducible-build flags: -buildid= zeros Go's build ID; -trimpath strips
+# absolute source paths from the binary so the same source tree on different
+# checkout directories produces byte-identical output. Together with a fixed
+# SOURCE_DATE_EPOCH (used by clang strip via Android NDK) this yields a
+# deterministic .so — same source SHA → same artifact SHA → no surprise
+# divergence between a contributor's local rebuild and the GitHub Release.
+GO_LDFLAGS="${GO_LDFLAGS:--w -s -buildid=}"
 ABIS="${ABIS:-arm64-v8a armeabi-v7a x86_64}"
+# Fixed epoch for clang/objcopy timestamps. Same value across all rebuilds.
+export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1700000000}"
 
 case "$(uname -s)" in
     Darwin) NDK_HOST=darwin-x86_64 ;;
@@ -67,6 +75,7 @@ for abi in $ABIS; do
         GOOS=android GOARCH="$goarch" CGO_ENABLED=1 \
             CC="$cc" CFLAGS="-O3 -Werror" \
             go build \
+                -trimpath \
                 -ldflags="$GO_LDFLAGS" \
                 -tags="$GO_TAGS" \
                 -buildmode=c-shared \
