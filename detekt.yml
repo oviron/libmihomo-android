@@ -1,0 +1,120 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+config:
+  validation: true
+  warningsAsErrors: false
+  checkExhaustiveness: false
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+    - 'FindingsReport'
+    - 'FileBasedFindingsReport'
+
+complexity:
+  active: true
+  CognitiveComplexMethod:
+    active: true
+    threshold: 20
+  ComplexCondition:
+    active: true
+    threshold: 4
+  ComplexInterface:
+    active: false
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 20
+  LargeClass:
+    active: true
+    threshold: 600
+  LongMethod:
+    active: true
+    threshold: 80
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 8
+  NestedBlockDepth:
+    active: true
+    threshold: 5
+  TooManyFunctions:
+    active: true
+    thresholdInClasses: 25
+    thresholdInFiles: 25
+    # JNI facade objects mirror the native ABI 1:1 (one Kotlin fn per
+    # `//export` symbol). 40 absorbs the current 32 + headroom.
+    thresholdInObjects: 40
+
+empty-blocks:
+  active: true
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: false
+  ThrowingExceptionsWithoutMessageOrCause:
+    active: true
+    exceptions:
+      - 'IllegalArgumentException'
+      - 'IllegalStateException'
+      - 'IOException'
+
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    ignoreAnnotated:
+      - 'Composable'
+      - 'Test'
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][A-Za-z0-9]*|[A-Z][_A-Z0-9]*'
+
+performance:
+  active: true
+  SpreadOperator:
+    active: false
+
+potential-bugs:
+  active: true
+  HasPlatformType:
+    active: true
+  UnreachableCode:
+    active: true
+
+style:
+  active: true
+  MagicNumber:
+    active: false
+  MaxLineLength:
+    active: true
+    maxLineLength: 140
+    excludePackageStatements: true
+    excludeImportStatements: true
+  ReturnCount:
+    active: true
+    max: 4
+  UnusedImports:
+    active: true
+  UnusedParameter:
+    active: false
+  UnusedPrivateMember:
+    active: true
+  UseCheckOrError:
+    active: false
+  WildcardImport:
+    active: true
+
+# formatting/* rules live in the detekt-formatting plugin (wraps ktlint).
+# Add via gradle (id 'io.gitlab.arturbosch.detekt' + detektPlugins 'dev.detekt:detekt-formatting:VERSION')
+# CLI install via `brew install detekt` does not include them — keep section commented out
+# so the bare CLI works. Style basics (UnusedImports, WildcardImport, MaxLineLength) are
+# already covered above under `style:`.

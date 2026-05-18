@@ -214,13 +214,13 @@ func invokeAction(callback unsafe.Pointer, paramsChar *C.char) {
 	go handleAction(action, result)
 }
 
-//export startTUN
-//
 // Starts the TUN listener bound to the given file descriptor from Android
 // VpnService.Builder. `device` becomes the interface label inside mihomo logs
 // and metrics. `stack` is "system" | "gvisor" | "mixed". `address` is a
 // comma-separated CIDR list (IPv4/IPv6). `dns` is a comma-separated host list
 // hijacked to port 53. Returns asynchronously through callback.
+//
+//export startTUN
 func startTUN(callback unsafe.Pointer, fd C.int, deviceChar, stackChar, addressChar, dnsChar *C.char) {
 	handleStartTun(callback, int(fd), takeCString(deviceChar), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar))
 	if !isRunning.Load() {
@@ -314,11 +314,11 @@ func updateDns(s *C.char) {
 	handleUpdateDns(takeCString(s))
 }
 
-//export bridgeABI
-//
 // Returns an integer identifying the JNI/bridge API surface. Bumped on
 // breaking changes. Consumers can check at runtime to detect mismatched
 // libclash.so + Kotlin stub pairings.
+//
+//export bridgeABI
 func bridgeABI() C.int {
 	return 1
 }

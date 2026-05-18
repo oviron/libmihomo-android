@@ -57,18 +57,7 @@ jobs:
         run: ./build-native.sh
 
       - name: Verify JNI exports
-        run: |
-          set -e
-          for abi in arm64-v8a armeabi-v7a x86_64; do
-            so="src/main/jniLibs/$abi/libclash.so"
-            count=$(nm -D "$so" 2>/dev/null | grep -cE ' T (invokeAction|startTUN|quickSetup|stopTun|setEventListener|getTraffic|getTotalTraffic|suspend|forceGC|updateDns|bridgeABI)$' || true)
-            if [ "$count" -ne 11 ]; then
-              echo "Expected 11 JNI exports in $so, got $count" >&2
-              nm -D "$so" 2>/dev/null | grep ' T ' >&2 || true
-              exit 1
-            fi
-            echo "$so: all 11 JNI exports present"
-          done
+        run: ./scripts/check-jni-exports.sh
 
       - name: Build .aar
         run: ./gradlew :assembleRelease --no-daemon
