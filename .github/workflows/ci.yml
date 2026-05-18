@@ -1,0 +1,126 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NDK_VERSION: 28.0.13004108
+  ANDROID_NDK_PATH: /usr/local/lib/android/sdk/ndk/28.0.13004108
+  JAVA_VERSION: '17'
+  GO_VERSION: '1.23'
+
+jobs:
+  go-vuln:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: src/main/jni/core/go.sum
+      - uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: ${{ env.GO_VERSION }}
+          work-dir: src/main/jni/core
+          go-package: ./...
+
+  kotlin-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - name: Install detekt
+        run: |
+          curl -sSLo detekt.jar https://github.com/detekt/detekt/releases/download/v1.23.7/detekt-cli-1.23.7-all.jar
+          echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/detekt >/dev/null
+          echo "exec java -jar $PWD/detekt.jar \"\$@\"" | sudo tee -a /usr/local/bin/detekt >/dev/null
+          sudo chmod +x /usr/local/bin/detekt
+      - name: Detekt
+        run: |
+          detekt \
+            --input src/main/kotlin \
+            --build-upon-default-config \
+            --config detekt.yml
+
+  secrets-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: src/main/jni/core/go.sum
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/cache@v4
+        id: ndk-cache
+        with:
+          path: ${{ env.ANDROID_NDK_PATH }}
+          key: ndk-${{ env.NDK_VERSION }}-${{ runner.os }}
+      - name: Install NDK if cache miss
+        if: steps.ndk-cache.outputs.cache-hit != 'true'
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;${{ env.NDK_VERSION }}"
+
+      - name: gofmt -d (Go source style)
+        working-directory: src/main/jni/core
+        run: |
+          out=$(gofmt -d .)
+          if [ -n "$out" ]; then
+            echo "$out"
+            echo "::error::run 'gofmt -w' on the files above"
+            exit 1
+          fi
+
+      # All Go files are gated by `//go:build android && cgo`; linters need
+      # the Android cross-compile context to resolve stdlib imports.
+      - name: golangci-lint (android/arm64 + NDK)
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.7.2
+          working-directory: src/main/jni/core
+          args: --config=${{ github.workspace }}/.golangci.yml
+        env:
+          GOOS: android
+          GOARCH: arm64
+          CGO_ENABLED: '1'
+          CC: ${{ env.ANDROID_NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
+
+      - name: Build libclash.so for all ABIs
+        env:
+          ANDROID_NDK: ${{ env.ANDROID_NDK_PATH }}
+        run: ./build-native.sh
+
+      - name: Verify JNI exports
+        run: ./scripts/check-jni-exports.sh
+
+      - name: Build .aar
+        run: ./gradlew :assembleRelease --no-daemon

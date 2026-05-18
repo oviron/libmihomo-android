@@ -1,0 +1,32 @@
+version: "2"
+
+run:
+  timeout: 5m
+  build-tags:
+    - with_gvisor
+    - cmfa
+    - android
+    - cgo
+
+linters:
+  default: none
+  enable:
+    - govet
+    - ineffassign
+    - misspell
+    - staticcheck
+    - unused
+    - gosec
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gosec
+    presets:
+      - common-false-positives
+      - legacy
+
+formatters:
+  enable:
+    - gofmt
+    - goimports

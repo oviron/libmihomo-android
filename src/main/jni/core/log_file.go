@@ -64,12 +64,6 @@ func openFileSinkLocked(path string) error {
 	return nil
 }
 
-func closeFileSink() {
-	fileSinkMu.Lock()
-	defer fileSinkMu.Unlock()
-	closeFileSinkLocked()
-}
-
 func closeFileSinkLocked() {
 	if fileSinkWr != nil {
 		_ = fileSinkWr.Flush()
