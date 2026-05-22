@@ -57,6 +57,8 @@ func handleChangeProxy(group, name string) error {
 	return nil
 }
 
+// Watchdog: race URLTest against ctx.Done() because some adapters don't
+// propagate SetDeadline to the underlying socket, so I/O can stall past ctx.
 func handleAsyncTestDelay(name, url string, timeoutMs int) int {
 	proxy, ok := proxyByName(name)
 	if !ok {
@@ -67,11 +69,26 @@ func handleAsyncTestDelay(name, url string, timeoutMs int) int {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutMs)*time.Millisecond)
 	defer cancel()
-	delay, err := proxy.URLTest(ctx, url, utils.IntRanges[uint16](nil))
-	if err != nil || ctx.Err() != nil || delay == 0 {
+
+	type result struct {
+		delay uint16
+		err   error
+	}
+	ch := make(chan result, 1)
+	go func() {
+		d, e := proxy.URLTest(ctx, url, utils.IntRanges[uint16](nil))
+		ch <- result{delay: d, err: e}
+	}()
+
+	select {
+	case r := <-ch:
+		if r.err != nil || ctx.Err() != nil || r.delay == 0 {
+			return -1
+		}
+		return int(r.delay)
+	case <-ctx.Done():
 		return -1
 	}
-	return int(delay)
 }
 
 func proxyByName(name string) (C.Proxy, bool) {
