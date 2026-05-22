@@ -13,7 +13,13 @@ import (
 	"github.com/metacubex/mihomo/component/profile/cachefile"
 	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
+	"golang.org/x/sync/semaphore"
 )
+
+// Caps in-flight URLTest goroutines, bounding leak from non-ctx-aware adapters.
+const urlTestSemCapacity = 256
+
+var urlTestSem = semaphore.NewWeighted(urlTestSemCapacity)
 
 // allProxies returns a name->proxy snapshot that merges tunnel.Proxies() with
 // proxies exposed by all providers. Provider-supplied proxies override tunnel
@@ -57,6 +63,9 @@ func handleChangeProxy(group, name string) error {
 	return nil
 }
 
+// Watchdog: race URLTest against ctx.Done() because some adapters don't
+// propagate SetDeadline to the underlying socket, so I/O can stall past ctx.
+// Semaphore caps leaked goroutines from such stalls.
 func handleAsyncTestDelay(name, url string, timeoutMs int) int {
 	proxy, ok := proxyByName(name)
 	if !ok {
@@ -65,13 +74,32 @@ func handleAsyncTestDelay(name, url string, timeoutMs int) int {
 	if timeoutMs <= 0 {
 		timeoutMs = 5000
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutMs)*time.Millisecond)
-	defer cancel()
-	delay, err := proxy.URLTest(ctx, url, utils.IntRanges[uint16](nil))
-	if err != nil || ctx.Err() != nil || delay == 0 {
+	if !urlTestSem.TryAcquire(1) {
 		return -1
 	}
-	return int(delay)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutMs)*time.Millisecond)
+	defer cancel()
+
+	type result struct {
+		delay uint16
+		err   error
+	}
+	ch := make(chan result, 1)
+	go func() {
+		defer urlTestSem.Release(1)
+		d, e := proxy.URLTest(ctx, url, utils.IntRanges[uint16](nil))
+		ch <- result{delay: d, err: e}
+	}()
+
+	select {
+	case r := <-ch:
+		if r.err != nil || ctx.Err() != nil || r.delay == 0 {
+			return -1
+		}
+		return int(r.delay)
+	case <-ctx.Done():
+		return -1
+	}
 }
 
 func proxyByName(name string) (C.Proxy, bool) {

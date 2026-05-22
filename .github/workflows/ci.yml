@@ -44,7 +44,9 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
       - name: Install detekt
         run: |
-          curl -sSLo detekt.jar https://github.com/detekt/detekt/releases/download/v1.23.7/detekt-cli-1.23.7-all.jar
+          set -euo pipefail
+          curl -fsSLo detekt.jar https://github.com/detekt/detekt/releases/download/v1.23.7/detekt-cli-1.23.7-all.jar
+          echo '84beded283012cb2b38bcaef4996452fcd6069d2e9ca74b50eaa79e0ad21897e  detekt.jar' | sha256sum -c -
           echo '#!/usr/bin/env bash' | sudo tee /usr/local/bin/detekt >/dev/null
           echo "exec java -jar $PWD/detekt.jar \"\$@\"" | sudo tee -a /usr/local/bin/detekt >/dev/null
           sudo chmod +x /usr/local/bin/detekt
