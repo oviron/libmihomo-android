@@ -8,6 +8,14 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.1.3] — 2026-05-29
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.24` → `v1.19.25`. Picks up the `net/http` CVE-2026-39825 fix and
+  the vless xhttp h3 quic-dial panic fix; the JNI/facade surface and
+  `bridgeABI` are unchanged.
+
 ## [0.1.0] — 2026-05-17
 
 Initial public release.
