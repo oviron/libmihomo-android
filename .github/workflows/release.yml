@@ -15,7 +15,8 @@ env:
   ANDROID_NDK_PATH: /usr/local/lib/android/sdk/ndk/28.0.13004108
   JAVA_VERSION: '17'
   GO_VERSION: '1.23'
-  GO_TAGS: with_gvisor,cmfa
+  # no_tailscale drops the mesh-VPN outbound stack we never use (~12 MB/ABI).
+  GO_TAGS: with_gvisor,cmfa,no_tailscale
 
 jobs:
   build:
@@ -70,6 +71,19 @@ jobs:
           sha256sum libmihomo-android-${{ github.ref_name }}.aar > libmihomo-android-${{ github.ref_name }}.aar.sha256
           cat libmihomo-android-${{ github.ref_name }}.aar.sha256
 
+      - name: Write metadata.json (bundled core version + bridgeABI)
+        run: |
+          CORE=$(cd src/main/jni/core && go list -m -f '{{.Version}}' github.com/metacubex/mihomo)
+          ABI=$(grep -oE 'EXPECTED_BRIDGE_ABI: Int = [0-9]+' \
+            src/main/kotlin/io/github/oviron/libmihomo/Clash.kt | grep -oE '[0-9]+$')
+          AAR="libmihomo-android-${{ github.ref_name }}.aar"
+          SHA=$(cut -d' ' -f1 "dist/$AAR.sha256")
+          jq -n --arg w "${{ github.ref_name }}" --arg cv "$CORE" --argjson abi "$ABI" \
+            --arg aar "$AAR" --arg sha "$SHA" \
+            '{wrapper:$w, core:{name:"mihomo", version:$cv}, bridgeABI:$abi, abis:["arm64-v8a","armeabi-v7a","x86_64"], aar:$aar, sha256:$sha}' \
+            > "dist/libmihomo-android-${{ github.ref_name }}.metadata.json"
+          cat "dist/libmihomo-android-${{ github.ref_name }}.metadata.json"
+
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec  # v6.3.0
         with:
@@ -92,6 +106,7 @@ jobs:
             dist/libmihomo-android-*.aar
             dist/libmihomo-android-*.aar.sha256
             dist/libmihomo-android-*.aar.asc
+            dist/libmihomo-android-*.metadata.json
 
   release:
     needs: build
@@ -128,24 +143,30 @@ jobs:
       - name: Flatten artifacts
         run: |
           mkdir -p release
-          find artifacts -type f \( -name '*.aar' -o -name '*.aar.sha256' -o -name '*.aar.asc' \) \
+          find artifacts -type f \( -name '*.aar' -o -name '*.aar.sha256' -o -name '*.aar.asc' -o -name '*.metadata.json' \) \
             -exec cp {} release/ \;
           ls -la release/
 
-      - name: Assert release contains 3 files (aar + sha256 + asc)
+      - name: Assert release contains 4 files (aar + sha256 + asc + metadata.json)
         run: |
           COUNT=$(/usr/bin/find release -type f | wc -l | tr -d ' ')
-          if [ "$COUNT" -ne 3 ]; then
-            echo "Expected 3 release files, got $COUNT:" >&2
+          if [ "$COUNT" -ne 4 ]; then
+            echo "Expected 4 release files, got $COUNT:" >&2
             /usr/bin/find release -type f >&2
             exit 1
           fi
+
+      - name: Read bundled core version for the release title
+        id: meta
+        run: |
+          CORE=$(jq -r '.core.name + " " + .core.version' release/libmihomo-android-*.metadata.json)
+          echo "core=$CORE" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2
         with:
           tag_name: ${{ steps.detect.outputs.tag }}
-          name: ${{ steps.detect.outputs.tag }}
+          name: ${{ steps.detect.outputs.tag }} (${{ steps.meta.outputs.core }})
           prerelease: ${{ steps.detect.outputs.prerelease }}
           generate_release_notes: true
           files: release/*

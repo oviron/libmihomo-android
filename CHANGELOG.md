@@ -8,6 +8,26 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.1.4] — 2026-06-02
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.25` → `v1.19.26`. No CVE in this range; substance is
+  OpenVPN/Snell/mieru/Tailscale work outside our outbound path. Rides along
+  sing-tun `0.4.20`, quic-go, and metacubex/tls `0.1.6` dep bumps. JNI/facade
+  surface and `bridgeABI` unchanged.
+- Added Go build tag `no_tailscale` to the release build
+  (`with_gvisor,cmfa,no_tailscale`). Drops the unused Tailscale mesh-VPN
+  outbound stack, shrinking `libclash.so` by ~12 MB/ABI (~36 MB across the
+  `.aar`).
+
+### Added
+- `metadata.json` release asset: machine-readable manifest declaring the
+  bundled core (`mihomo vX.Y.Z`), `bridgeABI`, ABIs, and AAR SHA-256. The
+  bundled core version is now also in the release title and the README
+  version matrix, so consumers (and the planned in-app version picker) can
+  see which core a wrapper release ships before downloading.
+
 ## [0.1.3] — 2026-05-29
 
 ### Changed

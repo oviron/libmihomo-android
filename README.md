@@ -8,13 +8,16 @@ The Kotlin facade exposes a small, typed API around mihomo's Go `//export` bound
 
 ## What's in each release
 
-Each `v*` tag attaches three files to its GitHub Release:
+Each `v*` tag attaches four files to its GitHub Release:
 
 | File | Description |
 |---|---|
 | `libmihomo-android-vX.Y.Z.aar` | Android library, all three ABIs (arm64-v8a + armeabi-v7a + x86_64) plus the Kotlin facade |
 | `libmihomo-android-vX.Y.Z.aar.sha256` | SHA-256 checksum |
 | `libmihomo-android-vX.Y.Z.aar.asc` | GPG detached signature |
+| `libmihomo-android-vX.Y.Z.metadata.json` | Machine-readable manifest: bundled mihomo version, `bridgeABI`, ABIs, AAR SHA-256 |
+
+The bundled core version is also in the release title (`vX.Y.Z (mihomo vA.B.C)`) and the matrix below.
 
 Verify before consuming:
 
@@ -28,6 +31,16 @@ gpg --verify libmihomo-android-vX.Y.Z.aar.asc libmihomo-android-vX.Y.Z.aar
 ```
 
 Public key fingerprint: `1139 C91B 6525 883E 6783 DCF0 4A94 DA48 8A4C 5033`. Cross-check against the maintainer's GitHub profile (https://github.com/oviron) or `keys.openpgp.org` before trusting it.
+
+## Version matrix
+
+Which mihomo core each wrapper release bundles. The wrapper version is an independent SemVer; the bundled core version is surfaced in the release title, this table, and `metadata.json`.
+
+| Wrapper | mihomo core | bridgeABI |
+|---|---|---|
+| `v0.1.4` | `v1.19.26` | 1 |
+| `v0.1.3` | `v1.19.25` | 1 |
+| `v0.1.2` | `v1.19.24` | 1 |
 
 ## What's inside the `.aar`
 
