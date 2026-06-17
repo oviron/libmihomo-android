@@ -1,10 +1,10 @@
 module github.com/oviron/libmihomo-android
 
-go 1.20
+go 1.25.0
 
 require (
 	github.com/metacubex/mihomo v1.19.27
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.21.0
 	golang.org/x/sys v0.30.0
 )
 
