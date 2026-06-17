@@ -8,6 +8,20 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.1.5] — 2026-06-17
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.26` → `v1.19.27`. Security release: fixes several remote-triggerable
+  core crashes — QUIC sniffer out-of-bounds read (crash via a single UDP
+  packet), Vision TLS filter OOB via a crafted `session_id`, Trojan UDP relay
+  panic, and a socks4 unbounded allocation. The QUIC sniffer fix is the one
+  relevant to our client path. Pulls in `age`/`sevenzip`/`brotli` indirect
+  deps behind upstream's new `path-in-bundle` rule-providers and
+  `age-secret-key` features. Upstream removed `global-client-fingerprint`
+  (set `client-fingerprint` on the proxy instead); not used by our consumers.
+  JNI/facade surface and `bridgeABI` unchanged.
+
 ## [0.1.4] — 2026-06-02
 
 ### Changed
