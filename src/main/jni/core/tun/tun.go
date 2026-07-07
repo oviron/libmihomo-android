@@ -19,14 +19,14 @@ import (
 	"github.com/metacubex/mihomo/tunnel"
 )
 
-// MTU matches CMfA. Android VpnService.Builder caps at 65535.
+// Fallback tun MTU when the caller passes mtu <= 0. Builder caps at 65535.
 const tunMTU = 9000
 
 // Start builds a sing_tun listener from the address/dns/stack inputs supplied
 // by the Android VpnService.Builder side. Caller chooses the device name —
 // it surfaces as the interface label inside mihomo logs and metrics. Returns
 // an io.Closer so consumers do not have to import sing_tun directly.
-func Start(fd int, device, stack, address, dns string) (io.Closer, error) {
+func Start(fd int, device, stack, address, dns string, mtu int) (io.Closer, error) {
 	var prefix4 []netip.Prefix
 	var prefix6 []netip.Prefix
 	tunStack, ok := constant.StackTypeMapping[strings.ToLower(stack)]
@@ -58,6 +58,11 @@ func Start(fd int, device, stack, address, dns string) (io.Closer, error) {
 		dnsHijack = append(dnsHijack, net.JoinHostPort(d, "53"))
 	}
 
+	eff := mtu
+	if eff <= 0 {
+		eff = tunMTU
+	}
+	mtu32 := uint32(eff) //nolint:gosec // G115: eff is guarded > 0 and a small MTU
 	options := LC.Tun{
 		Enable:              true,
 		Device:              device,
@@ -67,7 +72,7 @@ func Start(fd int, device, stack, address, dns string) (io.Closer, error) {
 		AutoDetectInterface: false,
 		Inet4Address:        prefix4,
 		Inet6Address:        prefix6,
-		MTU:                 tunMTU,
+		MTU:                 mtu32,
 		FileDescriptor:      fd,
 	}
 

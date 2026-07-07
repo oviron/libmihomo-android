@@ -9,10 +9,10 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_io_github_oviron_libmihomo_Clash_nativeStartTUN(JNIEnv *env, jclass clazz, jint fd,
                                                      jobject cb, jstring device, jstring stack,
-                                                     jstring address, jstring dns) {
+                                                     jstring address, jstring dns, jint mtu) {
     const auto interface = new_global(cb);
     startTUN(interface, fd, get_string(device), get_string(stack), get_string(address),
-             get_string(dns));
+             get_string(dns), mtu);
 }
 
 extern "C"
