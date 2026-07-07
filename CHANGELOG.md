@@ -8,6 +8,21 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-07-07
+
+### Added
+- `startTUN` now takes an `mtu` parameter (Go export, C header, JNI, and Kotlin
+  facade), so the caller sets the tun interface MTU instead of the hardcoded
+  `9000`. `mtu <= 0` falls back to the previous `9000` default. Lets a consumer
+  tune the MTU down for mobile/encapsulated paths where the jumbo default
+  silently blackholes oversized packets.
+
+### Changed
+- **Breaking:** `bridgeABI` `1` → `2`. The `startTUN` native-boundary signature
+  gained the `mtu` argument, so a consumer built against ABI 1 cannot load this
+  `.so` (the facade/`.so` ABI check refuses the mismatch). Rebuild against the
+  new facade. Bundled mihomo core is unchanged from `v0.1.5` (`v1.19.27`).
+
 ## [0.1.5] — 2026-06-17
 
 ### Changed

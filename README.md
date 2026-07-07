@@ -38,6 +38,7 @@ Which mihomo core each wrapper release bundles. The wrapper version is an indepe
 
 | Wrapper | mihomo core | bridgeABI |
 |---|---|---|
+| `v0.2.0` | `v1.19.27` | 2 |
 | `v0.1.5` | `v1.19.27` | 1 |
 | `v0.1.4` | `v1.19.26` | 1 |
 | `v0.1.3` | `v1.19.25` | 1 |
@@ -133,6 +134,7 @@ Clash.startTUN(
     stack = "system",             // "system" | "gvisor" | "mixed"
     address = "172.19.0.1/30",    // CIDR list, comma-separated
     dns = "1.1.1.1,1.0.0.1",      // hijacked at :53 inside the TUN
+    mtu = 1400,                   // tun MTU; <=0 falls back to 9000
 )
 
 // 6. Push events from mihomo (connection snapshots, log lines):
@@ -155,7 +157,7 @@ Lambda overloads exist for `invokeAction`, `quickSetup`, `setEventListener`, and
 A minimal lifecycle:
 
 1. Build a `VpnService.Builder`, call `.establish()`, get the int fd.
-2. Pass the fd to `Clash.startTUN(fd, tunInterface, device, stack, address, dns)`.
+2. Pass the fd to `Clash.startTUN(fd, tunInterface, device, stack, address, dns, mtu)`.
 3. Register a callback via `Clash.setEventListener` to receive push events from mihomo.
 4. Drive runtime changes through `Clash.invokeAction(jsonAction, callback)`; see `src/main/jni/core/action.go` for the full action vocabulary.
 5. On shutdown: `Clash.stopTun()` first, then close the VpnService.
@@ -172,7 +174,7 @@ A full reference consumer is [oviron/FlClash](https://github.com/oviron/FlClash)
 | `bridgeABI(): Int` | API surface version. Compare against `EXPECTED_BRIDGE_ABI`. |
 | `invokeAction(data, cb)` | Dispatches a JSON action document. Async result via `cb.onResult` or lambda. |
 | `quickSetup(initJson, setupJson, cb)` | One-shot mihomo init + profile apply. Result string (empty on success) via `cb`. |
-| `startTUN(fd, cb, device, stack, address, dns)` | Starts the TUN listener bound to `fd`. `cb` is a `TunInterface`. |
+| `startTUN(fd, cb, device, stack, address, dns, mtu)` | Starts the TUN listener bound to `fd`. `cb` is a `TunInterface`; `mtu` is the tun MTU (<=0 falls back to 9000). |
 | `stopTun()` | Stops the TUN listener. Idempotent. |
 | `setEventListener(cb)` | Registers a push-event sink. Pass `null` to clear. |
 | `getTraffic(): String` | Current bytes/sec snapshot (JSON). |

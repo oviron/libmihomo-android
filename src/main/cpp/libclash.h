@@ -81,7 +81,7 @@ extern "C" {
 
 extern void invokeAction(void* callback, char* paramsChar);
 extern void quickSetup(void* callback, char* initParamsChar, char* setupParamsChar);
-extern void startTUN(void* callback, int fd, char* deviceChar, char* stackChar, char* addressChar, char* dnsChar);
+extern void startTUN(void* callback, int fd, char* deviceChar, char* stackChar, char* addressChar, char* dnsChar, int mtu);
 extern void stopTun(void);
 extern void setEventListener(void* listener);
 extern char* getTraffic(void);
@@ -95,9 +95,9 @@ extern int  bridgeABI(void);
 }
 #endif
 
-#define LIBCLASH_EXPECTED_BRIDGE_ABI 1
+#define LIBCLASH_EXPECTED_BRIDGE_ABI 2
 
-_Static_assert(LIBCLASH_EXPECTED_BRIDGE_ABI == 1,
+_Static_assert(LIBCLASH_EXPECTED_BRIDGE_ABI == 2,
                "Update native-lib.cpp + Kotlin EXPECTED_BRIDGE_ABI together when bumping.");
 
 #endif /* VENDORED_LIBCLASH_H */

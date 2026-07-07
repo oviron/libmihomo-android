@@ -4,7 +4,7 @@ import java.io.File
 
 /** Native bridge to embedded mihomo; see README for lifecycle + threading. */
 object Clash {
-    const val EXPECTED_BRIDGE_ABI: Int = 1
+    const val EXPECTED_BRIDGE_ABI: Int = 2
 
     @Volatile
     private var initFailure: Throwable? = null
@@ -81,11 +81,14 @@ object Clash {
         stack: String,
         address: String,
         dns: String,
+        mtu: Int,
     ) {
         assertReady()
-        nativeStartTUN(fd, cb, device, stack, address, dns)
+        nativeStartTUN(fd, cb, device, stack, address, dns, mtu)
     }
 
+    // 8 params mirror the native ABI plus the cb split into protect/resolverProcess.
+    @Suppress("LongParameterList")
     fun startTUN(
         fd: Int,
         protect: (Int) -> Unit,
@@ -94,7 +97,8 @@ object Clash {
         stack: String,
         address: String,
         dns: String,
-    ) = startTUN(fd, lambdaTun(protect, resolverProcess), device, stack, address, dns)
+        mtu: Int,
+    ) = startTUN(fd, lambdaTun(protect, resolverProcess), device, stack, address, dns, mtu)
 
     fun stopTun() {
         assertReady()
@@ -170,6 +174,7 @@ object Clash {
         stack: String,
         address: String,
         dns: String,
+        mtu: Int,
     )
 
     @JvmStatic

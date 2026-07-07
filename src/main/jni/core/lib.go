@@ -52,13 +52,13 @@ type TunHandler struct {
 	limit *semaphore.Weighted
 }
 
-func (th *TunHandler) start(fd int, device, stack, address, dns string) {
+func (th *TunHandler) start(fd int, device, stack, address, dns string, mtu int) {
 	runLock.Lock()
 	defer runLock.Unlock()
 	_ = th.limit.Acquire(context.Background(), tunSemFullLock)
 	defer th.limit.Release(tunSemFullLock)
 	th.initHook()
-	listener, err := t.Start(fd, device, stack, address, dns)
+	listener, err := t.Start(fd, device, stack, address, dns, mtu)
 	if err != nil {
 		log.Errorln("TUN start failed: %v", err)
 		th.clear()
@@ -157,7 +157,7 @@ func handleStopTun() {
 	stopTunLocked()
 }
 
-func handleStartTun(callback unsafe.Pointer, fd int, device, stack, address, dns string) {
+func handleStartTun(callback unsafe.Pointer, fd int, device, stack, address, dns string, mtu int) {
 	tunLock.Lock()
 	defer tunLock.Unlock()
 	stopTunLocked()
@@ -172,7 +172,7 @@ func handleStartTun(callback unsafe.Pointer, fd int, device, stack, address, dns
 		callback: callback,
 		limit:    semaphore.NewWeighted(tunSemCapacity),
 	}
-	tunHandler.start(fd, device, stack, address, dns)
+	tunHandler.start(fd, device, stack, address, dns, mtu)
 }
 
 func handleUpdateDns(value string) {
@@ -218,11 +218,12 @@ func invokeAction(callback unsafe.Pointer, paramsChar *C.char) {
 // VpnService.Builder. `device` becomes the interface label inside mihomo logs
 // and metrics. `stack` is "system" | "gvisor" | "mixed". `address` is a
 // comma-separated CIDR list (IPv4/IPv6). `dns` is a comma-separated host list
-// hijacked to port 53. Returns asynchronously through callback.
+// hijacked to port 53. `mtu` is the tun MTU (<=0 falls back to the default).
+// Returns asynchronously through callback.
 //
 //export startTUN
-func startTUN(callback unsafe.Pointer, fd C.int, deviceChar, stackChar, addressChar, dnsChar *C.char) {
-	handleStartTun(callback, int(fd), takeCString(deviceChar), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar))
+func startTUN(callback unsafe.Pointer, fd C.int, deviceChar, stackChar, addressChar, dnsChar *C.char, mtu C.int) {
+	handleStartTun(callback, int(fd), takeCString(deviceChar), takeCString(stackChar), takeCString(addressChar), takeCString(dnsChar), int(mtu))
 	if !isRunning.Load() {
 		handleStartListener()
 	} else {
@@ -320,5 +321,5 @@ func updateDns(s *C.char) {
 //
 //export bridgeABI
 func bridgeABI() C.int {
-	return 1
+	return 2
 }
