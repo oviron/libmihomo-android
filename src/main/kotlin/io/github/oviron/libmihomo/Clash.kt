@@ -4,7 +4,7 @@ import java.io.File
 
 /** Native bridge to embedded mihomo; see README for lifecycle + threading. */
 object Clash {
-    const val EXPECTED_BRIDGE_ABI: Int = 2
+    const val EXPECTED_BRIDGE_ABI: Int = 3
 
     @Volatile
     private var initFailure: Throwable? = null

@@ -8,6 +8,29 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-07-08
+
+### Fixed
+- resolveProcess JNI upcall no longer aborts the `:remote` process. On Android
+  11+ package-visibility filtering the consumer's `getPackagesForUid()` can
+  return an empty array, whose `.first()` throws across the JNI boundary; the
+  native shim now null/exception-guards the `packageName` upcall
+  (`native-lib.cpp`) and `jni_get_string` (`jni_helper.cpp`), returning an empty
+  string instead of a `JNI DETECTED ERROR ... obj == null` SIGABRT crash-loop.
+
+### Added
+- `resolveProcess` may now return `"<uid>\n<package>"`; the Go resolver parses
+  the leading uid into `metadata.Uid`, reviving mihomo UID-based rule matching. A
+  plain package string (no newline) still works, so the parse is backward
+  compatible.
+
+### Changed
+- **Breaking:** `bridgeABI` `2` → `3`. The `resolveProcess` return-string
+  protocol gained the optional `uid\npackage` convention; a consumer emitting it
+  against an ABI-2 `.so` would have its package silently misparsed, so the ABI
+  gate refuses the mismatched pairing. Rebuild against the new facade. Bundled
+  mihomo core unchanged (`v1.19.27`).
+
 ## [0.2.0] — 2026-07-07
 
 ### Added

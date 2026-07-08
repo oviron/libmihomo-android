@@ -13,6 +13,7 @@ import (
 	"errors"
 	"io"
 	"net"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -129,7 +130,14 @@ func (th *TunHandler) initHook() {
 		if src == nil || dst == nil {
 			return "", process.ErrInvalidNetwork
 		}
-		return tunHandler.handleResolveProcess(src, dst), nil
+		result := tunHandler.handleResolveProcess(src, dst)
+		if parts := strings.SplitN(result, "\n", 2); len(parts) == 2 {
+			if uid, err := strconv.ParseUint(parts[0], 10, 32); err == nil {
+				metadata.Uid = uint32(uid)
+			}
+			return parts[1], nil
+		}
+		return result, nil
 	}
 }
 
@@ -321,5 +329,5 @@ func updateDns(s *C.char) {
 //
 //export bridgeABI
 func bridgeABI() C.int {
-	return 2
+	return 3
 }
