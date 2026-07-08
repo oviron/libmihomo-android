@@ -8,6 +8,21 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.1] — 2026-07-09
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.27` → `v1.19.28`. Picks up the crypto/tls fix for **CVE-2026-42505**
+  (via `metacubex/tls` `0.1.6` → `0.1.7`) plus several remote-triggerable panic
+  fixes — AmneziaWG receive-path slice-bounds OOB, masque dial panic, `rand.IntN`
+  on a nil slice, and a `sing-mux` UDP-write bug. Rides along `sing-tun`
+  `0.4.20` → `0.4.21`, `utls` `1.8.4` → `1.8.7`, `sing-mux` `0.3.10`,
+  `restls-client-go` `0.1.8`, and `mieru` `3.34.0` dep bumps. The rest of
+  upstream is additive outbound/listener features (`rematch` outbound, masque
+  h3, openvpn peer-info, snell shadow-tls) outside our client path. The
+  `dualStackDialContext` fallback-connection-leak fix touches our outbound
+  dialing. JNI/facade surface and `bridgeABI` (`3`) unchanged.
+
 ## [0.3.0] — 2026-07-08
 
 ### Fixed
