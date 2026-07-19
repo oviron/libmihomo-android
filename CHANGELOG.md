@@ -8,6 +8,19 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.2] — 2026-07-19
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.28` → `v1.19.29`. Upstream is predominantly additive protocol work
+  (JLS and restls for vmess/vless/trojan/shadowsocks/anytls/snell, shadowquic
+  outbound and listener, OpenVPN TLS rekey and `tls-crypt-v2`, anytls 0.0.13),
+  which pulls in two new indirect deps — `metacubex/jls-tls` and
+  `metacubex/jls-quic-go` — and drops `metacubex/sing-shadowtls` after upstream
+  reimplemented shadowtls in-tree. `metacubex/tailscale` rides along to
+  `20260711142031`. JNI/facade surface and `bridgeABI` (`3`) unchanged; all
+  three ABIs rebuild clean and export the expected 11 symbols.
+
 ## [0.3.1] — 2026-07-09
 
 ### Changed
