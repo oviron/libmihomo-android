@@ -15,7 +15,7 @@ env:
   NDK_VERSION: 28.0.13004108
   ANDROID_NDK_PATH: /usr/local/lib/android/sdk/ndk/28.0.13004108
   JAVA_VERSION: '17'
-  GO_VERSION: '1.23'
+  GO_VERSION: '1.25'
 
 jobs:
   go-vuln:
