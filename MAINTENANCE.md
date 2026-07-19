@@ -7,7 +7,8 @@ which any successor can rotate.
 
 ## Build environment
 
-- **Go**: 1.20+ (release pipeline uses the latest stable Go available at run time)
+- **Go**: `go.mod` declares 1.20; CI and the release pipeline both pin 1.25 via
+  `GO_VERSION` in `.github/workflows/{ci,release}.yml` (govulncheck needs 1.25+)
 - **Android Gradle Plugin**: 8.12.2 (pinned in `build.gradle.kts`)
 - **Kotlin**: 2.2.10
 - **Gradle**: 8.13 (via wrapper)
