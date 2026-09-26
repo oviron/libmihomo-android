@@ -8,7 +8,7 @@
 #   ANDROID_NDK — path to NDK 28+ (e.g. $ANDROID_HOME/ndk/28.0.13004108)
 #
 # Optional:
-#   GO_TAGS — default "with_gvisor,cmfa"
+#   GO_TAGS — default "with_gvisor,cmfa,no_tailscale,no_easytier" (the release set)
 #   GO_LDFLAGS — default "-w -s"
 #   ABIS — space-separated list, default "arm64-v8a armeabi-v7a x86_64"
 
@@ -17,7 +17,9 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 : "${ANDROID_NDK:?ANDROID_NDK must point at an NDK 28+ install}"
-GO_TAGS="${GO_TAGS:-with_gvisor,cmfa}"
+# no_tailscale and no_easytier drop mesh-VPN outbounds we never use
+# (~12 MB/ABI each; EasyTier embeds a WebAssembly core plus wazero).
+GO_TAGS="${GO_TAGS:-with_gvisor,cmfa,no_tailscale,no_easytier}"
 # Reproducible-build flags: -buildid= zeros Go's build ID; -trimpath strips
 # absolute source paths from the binary so the same source tree on different
 # checkout directories produces byte-identical output. Together with a fixed

@@ -8,6 +8,43 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.5] — 2026-09-27
+
+Same mihomo `v1.19.31` as 0.3.4; toolchain, dependency and packaging fixes.
+
+### Security
+- `golang.org/x/net` `0.35.0` → `0.59.0` and `golang.org/x/text` `0.22.0` →
+  `0.42.0` (dragging `x/crypto` to `0.57.0` and `x/sys`, `x/sync`, `x/term`
+  along). A source-mode `govulncheck` of the android/arm64 build reached four
+  advisories through our call graph: GO-2026-5026, GO-2026-4918 (HTTP/2
+  transport infinite loop on a bad `SETTINGS_MAX_FRAME_SIZE`), GO-2025-3503
+  (proxy bypass via IPv6 zone IDs) and GO-2026-5970 (`x/text` infinite loop).
+  It now reports none reachable. These modules sat at mihomo's go1.20-era
+  pins in every earlier release.
+
+### Changed
+- Built with Go `1.27` (was `1.25`, which left support when 1.27 shipped).
+  `go.mod` now declares `go 1.26.0`, the floor the new `golang.org/x/*`
+  require, and pins `godebug default=go1.20` so runtime GODEBUG defaults
+  (TLS, x509, net/http) stay at the level upstream mihomo builds with.
+- The EasyTier outbound is compiled out (`no_easytier`), same as Tailscale
+  (`no_tailscale`): 0.3.4 grew `libclash.so` by ~11 MB per ABI for a
+  mesh-VPN outbound nothing on our side uses, most of it an embedded
+  6.9 MB WebAssembly core plus the wazero runtime. An `easytier` proxy in a
+  config is now rejected with a "disabled by build tag" error, as a
+  `tailscale` one already was.
+- `build-native.sh` defaults to the release tag set
+  (`with_gvisor,cmfa,no_tailscale,no_easytier`), so CI and local builds
+  compile what ships. Until now only the release workflow dropped Tailscale.
+
+### Fixed
+- The CI `go-vuln` job scanned nothing. Every Go file is gated by
+  `//go:build android && cgo`, and the job ran on the host GOOS, so
+  `govulncheck ./...` loaded zero packages and passed vacuously. It now scans
+  the android/arm64 build with the release tags, with `govulncheck` pinned
+  to `v1.8.0` so an upstream release cannot again demand a newer toolchain
+  mid-cycle. golangci-lint `v2.7.2` → `v2.14.0` for the new `go` line.
+
 ## [0.3.4] — 2026-09-27
 
 ### Changed

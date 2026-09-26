@@ -15,9 +15,13 @@ env:
   NDK_VERSION: 28.0.13004108
   ANDROID_NDK_PATH: /usr/local/lib/android/sdk/ndk/28.0.13004108
   JAVA_VERSION: '17'
-  GO_VERSION: '1.25'
+  GO_VERSION: '1.27'
 
 jobs:
+  # All Go files are gated by `//go:build android && cgo`, so a host-GOOS scan
+  # loads zero packages and passes vacuously. Scan the android/arm64 build
+  # with the release tags instead; govulncheck is pinned so a new release
+  # cannot silently demand a newer toolchain.
   go-vuln:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -27,11 +31,25 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: src/main/jni/core/go.sum
-      - uses: golang/govulncheck-action@v1
+      - uses: actions/cache@v4
+        id: ndk-cache
         with:
-          go-version-input: ${{ env.GO_VERSION }}
-          work-dir: src/main/jni/core
-          go-package: ./...
+          path: ${{ env.ANDROID_NDK_PATH }}
+          key: ndk-${{ env.NDK_VERSION }}-${{ runner.os }}
+      - name: Install NDK if cache miss
+        if: steps.ndk-cache.outputs.cache-hit != 'true'
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;${{ env.NDK_VERSION }}"
+      - name: govulncheck (android/arm64, release tags)
+        working-directory: src/main/jni/core
+        env:
+          GOOS: android
+          GOARCH: arm64
+          CGO_ENABLED: '1'
+          CC: ${{ env.ANDROID_NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
+        run: |
+          GOOS= GOARCH= CGO_ENABLED= CC= go install golang.org/x/vuln/cmd/govulncheck@v1.8.0
+          "$(go env GOPATH)/bin/govulncheck" -tags=with_gvisor,cmfa,no_tailscale,no_easytier ./...
 
   kotlin-lint:
     runs-on: ubuntu-latest
@@ -107,7 +125,7 @@ jobs:
       - name: golangci-lint (android/arm64 + NDK)
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.7.2
+          version: v2.14.0
           working-directory: src/main/jni/core
           args: --config=${{ github.workspace }}/.golangci.yml
         env:

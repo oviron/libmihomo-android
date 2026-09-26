@@ -7,8 +7,15 @@ which any successor can rotate.
 
 ## Build environment
 
-- **Go**: `go.mod` declares 1.20; CI and the release pipeline both pin 1.25 via
-  `GO_VERSION` in `.github/workflows/{ci,release}.yml` (govulncheck needs 1.25+)
+- **Go**: CI and the release pipeline both pin 1.27 via `GO_VERSION` in
+  `.github/workflows/{ci,release}.yml`. Go supports only the two newest major
+  releases, so bump this when 1.29 ships (≈ August 2027). `go.mod` declares
+  `go 1.26.0` (the floor current `golang.org/x/*` requires) but pins
+  `godebug default=go1.20`, the level upstream mihomo declares, so runtime
+  GODEBUG defaults (TLS, x509, net/http) match upstream builds.
+- **Build tags**: `with_gvisor,cmfa,no_tailscale,no_easytier`, the default in
+  `build-native.sh`; CI and the release both use it. The two `no_*` tags drop
+  mesh-VPN outbounds (~12 MB per ABI each)
 - **Android Gradle Plugin**: 8.12.2 (pinned in `build.gradle.kts`)
 - **Kotlin**: 2.2.10
 - **Gradle**: 8.13 (via wrapper)
