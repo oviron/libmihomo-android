@@ -38,6 +38,9 @@ Which mihomo core each wrapper release bundles. The wrapper version is an indepe
 
 | Wrapper | mihomo core | bridgeABI |
 |---|---|---|
+| `v0.3.4` | `v1.19.31` | 3 |
+| `v0.3.3` | `v1.19.30` | 3 |
+| `v0.3.2` | `v1.19.29` | 3 |
 | `v0.3.1` | `v1.19.28` | 3 |
 | `v0.3.0` | `v1.19.27` | 3 |
 | `v0.2.0` | `v1.19.27` | 2 |
@@ -133,7 +136,7 @@ Clash.startTUN(
     fd = tunFd,
     cb = myVpnService,            // TunInterface
     device = "my-vpn-app",        // shown in mihomo logs / metrics
-    stack = "system",             // "system" | "gvisor" | "mixed"
+    stack = "system",             // "system" | "gvisor" | "mixed" | "mips"
     address = "172.19.0.1/30",    // CIDR list, comma-separated
     dns = "1.1.1.1,1.0.0.1",      // hijacked at :53 inside the TUN
     mtu = 1400,                   // tun MTU; <=0 falls back to 9000

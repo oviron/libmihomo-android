@@ -8,6 +8,28 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.4] — 2026-09-27
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.30` → `v1.19.31` (51 upstream commits). No CVE fixes this time; the
+  client-path fixes are hysteria v1 UDP handling restored and hysteria2 UDP
+  sessions closed with their connection, a VLESS decryption cleanup panic, a
+  nil dereference in WireGuard init, split-DNS over a tailnet peer failing
+  silently in tsnet mode, `DomainSet` wildcard matching with overlapping
+  rules, IPv6 URLs in xhttp, and the OpenVPN tls-auth HMAC digest derived from
+  `auth` instead of hard-coded SHA-1. A sweep of "close connection after error
+  handling" fixes across doq, mkcp, snell, kcptun, tuic and sudoku, plus
+  lower gVisor/mipstack memory use. Additive: EasyTier outbound, `stack: mips`
+  for tun (reachable through the existing `stack` string of `startTUN`),
+  ZeroTier `identity-secret`. New indirect deps `easytier-go` and
+  `metacubex/wazero` ride in with EasyTier; the YAML library moves to
+  `go.yaml.in/yaml/v3`; `sing-tun` `0.4.22` → `0.4.24`, `mieru` `3.35.0` →
+  `3.37.0`, `tailscale` to v1.102.3, `gvisor`, `sing-quic`,
+  `sing-shadowsocks{,2}` and `amneziawg-go` come along. JNI/facade surface and
+  `bridgeABI` (`3`) unchanged; all three ABIs rebuild clean and export the
+  expected 11 symbols.
+
 ### Fixed
 - A core crash no longer erases its own traceback. `captureStdFd` redirects fd
   2 into a pipe drained by a goroutine in the same process, so a fatal signal

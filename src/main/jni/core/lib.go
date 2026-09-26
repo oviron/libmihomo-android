@@ -224,7 +224,7 @@ func invokeAction(callback unsafe.Pointer, paramsChar *C.char) {
 
 // Starts the TUN listener bound to the given file descriptor from Android
 // VpnService.Builder. `device` becomes the interface label inside mihomo logs
-// and metrics. `stack` is "system" | "gvisor" | "mixed". `address` is a
+// and metrics. `stack` is "system" | "gvisor" | "mixed" | "mips". `address` is a
 // comma-separated CIDR list (IPv4/IPv6). `dns` is a comma-separated host list
 // hijacked to port 53. `mtu` is the tun MTU (<=0 falls back to the default).
 // Returns asynchronously through callback.
