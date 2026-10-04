@@ -8,6 +8,26 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.6] — 2026-10-04
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.31` → `v1.19.32` (16 upstream commits). No CVE fixes this time. The
+  client-path fixes: a nil dereference when the context is cancelled while an
+  h2 connection is being set up, half-close in sing-mux, the effective MSS now
+  accounts for TCP options, and a race in anytls idle-session cleanup. The
+  converter passes xhttp `extra.headers` through. Additive: `hash-key` for
+  load-balance groups and a `congestion-controller` option for tun. Upstream
+  changed the default tun stack to `mips`; `startTUN` always takes the stack
+  from its `stack` argument, so callers keep the stack they pass. Dependencies
+  that come along: `sing-tun` `0.4.24` → `0.4.27`, `sing` `0.5.7` → `0.5.8`,
+  `sing-mux` `0.3.10` → `0.3.12`, `utls` `1.8.7` → `1.8.8`, `mieru` `3.37.0` →
+  `3.38.0`, plus `gvisor`, `mipstack`, `metacubex/http`, `metacubex/cpu` and
+  `netipx`. `golang.org/x/*` stay at the 0.3.5 versions; a source-mode
+  `govulncheck` of the android/arm64 build reports nothing reachable.
+  JNI/facade surface and `bridgeABI` (`3`) unchanged; all three ABIs rebuild
+  clean and export the expected 11 symbols.
+
 ## [0.3.5] — 2026-09-27
 
 Same mihomo `v1.19.31` as 0.3.4; toolchain, dependency and packaging fixes.
