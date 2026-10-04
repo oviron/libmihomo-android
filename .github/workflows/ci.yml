@@ -56,7 +56,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6  # v6.0.1
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
@@ -95,11 +95,11 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: src/main/jni/core/go.sum
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6  # v6.0.1
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@0723195856401067f7a2779048b490ace7a47d7c  # v5.0.2
       - uses: actions/cache@v4
         id: ndk-cache
         with:
@@ -133,6 +133,11 @@ jobs:
           GOARCH: arm64
           CGO_ENABLED: '1'
           CC: ${{ env.ANDROID_NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
+
+      # dnsquery has no build tags, so it tests on the host.
+      - name: go test (host-testable packages)
+        working-directory: src/main/jni/core
+        run: go test -race ./dnsquery/
 
       - name: Build libclash.so for all ABIs
         env:

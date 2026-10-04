@@ -21,6 +21,8 @@ import (
 	"github.com/metacubex/mihomo/listener"
 	"github.com/metacubex/mihomo/log"
 	"github.com/metacubex/mihomo/tunnel"
+
+	"github.com/oviron/libmihomo-android/dnsquery"
 )
 
 // Mihomo profile filename inside the consumer-supplied home directory.
@@ -37,6 +39,7 @@ var (
 	runLock           sync.Mutex
 	proxyGroupOrder   []string
 	proxyGroupOrderMu sync.RWMutex
+	dnsQueries        = dnsquery.NewLog(500)
 )
 
 func updateListeners() {
@@ -197,6 +200,7 @@ func applyConfig(params *SetupParams) error {
 	// so our local updateListeners is redundant here (it stays useful for
 	// the partial-update path in updateConfig).
 	executor.ApplyConfig(currentConfig, true)
+	dnsquery.Install(dnsQueries)
 	patchSelectGroup(params.SelectedMap)
 
 	switch {

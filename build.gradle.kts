@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
+
 plugins {
-    id("com.android.library") version "8.12.2"
-    id("org.jetbrains.kotlin.android") version "2.2.10"
+    id("com.android.library") version "8.13.2"
+    id("org.jetbrains.kotlin.android") version "2.4.20"
 }
 
 android {
@@ -41,10 +44,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
     packaging {
         jniLibs.useLegacyPackaging = false
     }
@@ -53,6 +52,15 @@ android {
         release {
             isMinifyEnabled = false
         }
+    }
+}
+
+// Metadata stays readable by consumers on Kotlin 2.2 (FlClash).
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_17)
+        languageVersion.set(KotlinVersion.KOTLIN_2_2)
+        apiVersion.set(KotlinVersion.KOTLIN_2_2)
     }
 }
 

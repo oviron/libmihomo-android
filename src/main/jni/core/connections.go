@@ -24,6 +24,11 @@ func handleGetConnections() string {
 	return string(data)
 }
 
+func handleGetDnsQueries() string {
+	data, _ := json.Marshal(dnsQueries.Snapshot())
+	return string(data)
+}
+
 func handleSubscribeConnections() {
 	connectionsMu.Lock()
 	defer connectionsMu.Unlock()

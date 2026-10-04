@@ -310,6 +310,13 @@ func handleAction(action *Action, result ActionResult) {
 	case closeAllConnectionsMethod:
 		result.success(handleCloseAllConnections())
 		return
+	case getDnsQueriesMethod:
+		result.success(handleGetDnsQueries())
+		return
+	case clearDnsQueriesMethod:
+		dnsQueries.Clear()
+		result.success(true)
+		return
 	case setLogcatLevelMethod:
 		level, ok := parseLogLevelData(action.Data, &result)
 		if !ok {

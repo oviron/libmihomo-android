@@ -8,6 +8,30 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.7] — 2026-10-04
+
+### Added
+- DNS query history. The core keeps the last 500 queries that reach mihomo's
+  `resolver.DefaultService`: TUN DNS hijack and the `dns` outbound. Each entry
+  has domain, query type, answers, rcode or error, latency in ms, and time.
+  The service is wrapped after every config apply, so no mihomo fork is
+  needed. Two new actions for `invokeAction`: `getDnsQueries` returns a JSON
+  array, newest first; `clearDnsQueries` empties it. Not recorded: the
+  `dns.listen` server (it keeps its own service reference) and lookups the core
+  makes for itself (proxy server names, rule matching). JNI surface and
+  `bridgeABI` (`3`) unchanged.
+
+### Changed
+- Build toolchain: Kotlin `2.2.10` → `2.4.20`, AGP `8.12.2` → `8.13.2`. The
+  facade compiles with language and API version 2.2 (`mv=[2,2,0]` in class
+  metadata), so hosts on Kotlin 2.2 keep reading it. Kotlin 2.4 warns that
+  Gradle 8.x is deprecated; moving to Gradle 9 needs AGP 9 and is left for a
+  separate change.
+- CI: `actions/setup-java` `v4` → `v6.0.1`, `gradle/actions/setup-gradle`
+  `v4.3.1` → `v5.0.2`, both pinned by commit SHA. `setup-gradle` v6 is not
+  taken: its caching moved to a proprietary component under separate terms.
+- CI runs `go test -race` on the `dnsquery` package.
+
 ## [0.3.6] — 2026-10-04
 
 ### Changed
