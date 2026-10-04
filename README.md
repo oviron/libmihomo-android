@@ -38,6 +38,7 @@ Which mihomo core each wrapper release bundles. The wrapper version is an indepe
 
 | Wrapper | mihomo core | bridgeABI |
 |---|---|---|
+| `v0.3.7` | `v1.19.32` | 3 |
 | `v0.3.6` | `v1.19.32` | 3 |
 | `v0.3.5` | `v1.19.31` | 3 |
 | `v0.3.4` | `v1.19.31` | 3 |
@@ -65,6 +66,7 @@ A consumer calls Kotlin methods on `Clash`; the library handles JNI marshalling,
 
 - **minSdk 21** (Android 5.0+). The `.so` files are built with `-DANDROID_PLATFORM=android-21`; older devices fail at load time.
 - **AGP 8.5.1+** in the host APK so it is itself 16 KB page-aligned for Android 15+. The `.so` files in this library are built 16 KB-aligned by NDK 28.
+- **Kotlin 2.2+** in the host app. The facade is built with Kotlin 2.4 at language and API version 2.2, so its metadata is readable from 2.2 on.
 - **ABIs**: arm64-v8a, armeabi-v7a, x86_64. No 32-bit x86 (`x86`) build is shipped; it's irrelevant for current Android devices.
 
 ## Integration

@@ -113,6 +113,8 @@ const (
 	setFileEnabledMethod           Method = "setFileEnabled"
 	setLogFilePathMethod           Method = "setLogFilePath"
 	forwardHostLogMethod           Method = "forwardHostLog"
+	getDnsQueriesMethod            Method = "getDnsQueries"
+	clearDnsQueriesMethod          Method = "clearDnsQueries"
 )
 
 type Method string
