@@ -200,6 +200,7 @@ func applyConfig(params *SetupParams) error {
 	// so our local updateListeners is redundant here (it stays useful for
 	// the partial-update path in updateConfig).
 	executor.ApplyConfig(currentConfig, true)
+	startGeoUpdater()
 	dnsquery.Install(dnsQueries)
 	patchSelectGroup(params.SelectedMap)
 

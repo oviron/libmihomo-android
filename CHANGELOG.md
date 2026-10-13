@@ -22,6 +22,11 @@ Until v1.0 the public API is considered unstable; breaking changes bump
   returns all delays, with a nested group's leaf given the delay its parent
   picked by.
 
+### Fixed
+- `geo-auto-update` now runs. mihomo starts its schedule only from its CLI
+  `main`, so a config asking for it never refreshed the Geo databases here. The
+  loop checks hourly and follows a later config's interval or switch-off.
+
 ### Changed
 - A delay test waits up to 30 s for one of the 256 test slots instead of
   failing at once, so a group test over a big subscription does not report
