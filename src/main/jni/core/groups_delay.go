@@ -20,9 +20,8 @@ type GroupDelay struct {
 }
 
 type groupState struct {
-	TestURL        string `json:"testUrl"`
-	Fixed          string `json:"fixed"`
-	ExpectedStatus string `json:"expectedStatus"`
+	TestURL string `json:"testUrl"`
+	Fixed   string `json:"fixed"`
 }
 
 // handleTestGroups tests the named groups and their nested groups at once, a
@@ -76,7 +75,7 @@ func handleTestGroups(names []string, defaultURL string, timeoutMs int) string {
 		state := stateOf(g)
 		url := urlOf(state)
 		members := g.Proxies()
-		expected, _ := utils.NewUnsignedRanges[uint16](state.ExpectedStatus)
+		expected, _ := utils.NewUnsignedRanges[uint16](expectedStatusOf(name))
 		delays := testMembers(members, url, expected, timeoutMs, await)
 		memberNames := make([]string, len(members))
 		found := make([]GroupDelay, 0, 2*len(members))

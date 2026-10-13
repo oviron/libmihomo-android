@@ -5,6 +5,7 @@ package main
 import (
 	b "bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -38,6 +39,7 @@ var (
 	isInit            atomic.Bool
 	runLock           sync.Mutex
 	proxyGroupOrder   []string
+	groupExpected     map[string]string
 	proxyGroupOrderMu sync.RWMutex
 	dnsQueries        = dnsquery.NewLog(500)
 )
@@ -220,9 +222,13 @@ func captureProxyGroupOrder(raw *config.RawConfig) {
 		return
 	}
 	order := make([]string, 0, len(raw.ProxyGroup))
+	expected := map[string]string{}
 	for _, g := range raw.ProxyGroup {
 		if name, ok := g["name"].(string); ok && name != "" {
 			order = append(order, name)
+			if status, ok := g["expected-status"]; ok {
+				expected[name] = fmt.Sprint(status)
+			}
 		}
 	}
 	if len(order) == 0 {
@@ -230,7 +236,15 @@ func captureProxyGroupOrder(raw *config.RawConfig) {
 	}
 	proxyGroupOrderMu.Lock()
 	proxyGroupOrder = order
+	groupExpected = expected
 	proxyGroupOrderMu.Unlock()
+}
+
+// expectedStatusOf comes from the config: a select group's JSON leaves it out.
+func expectedStatusOf(group string) string {
+	proxyGroupOrderMu.RLock()
+	defer proxyGroupOrderMu.RUnlock()
+	return groupExpected[group]
 }
 
 func queryProxyGroupOrder() string {

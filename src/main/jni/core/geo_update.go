@@ -31,18 +31,33 @@ func geoUpdateLoop() {
 			interval > 0 && time.Since(updated) >= interval {
 			if err := updater.UpdateGeoDatabases(); err != nil {
 				log.Warnln("[GEO] auto-update failed: %v", err)
+			} else {
+				markGeoChecked()
 			}
 		}
 		time.Sleep(time.Hour)
 	}
 }
 
+func geoPaths() []string {
+	return []string{C.Path.GeoIP(), C.Path.MMDB(), C.Path.ASN(), C.Path.GeoSite()}
+}
+
 // geoUpdatedAt mirrors mihomo's own check: no database on disk, nothing to refresh.
 func geoUpdatedAt() (time.Time, bool) {
-	for _, path := range []string{C.Path.GeoIP(), C.Path.MMDB(), C.Path.ASN(), C.Path.GeoSite()} {
+	for _, path := range geoPaths() {
 		if info, err := os.Stat(path); err == nil {
 			return info.ModTime(), true
 		}
 	}
 	return time.Time{}, false
+}
+
+// markGeoChecked restarts the interval: an unchanged database is not
+// rewritten, and its old mtime would otherwise ask for a check every hour.
+func markGeoChecked() {
+	now := time.Now()
+	for _, path := range geoPaths() {
+		_ = os.Chtimes(path, now, now)
+	}
 }

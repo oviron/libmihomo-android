@@ -23,6 +23,10 @@ const urlTestSemCapacity = 256
 
 var urlTestSem = semaphore.NewWeighted(urlTestSemCapacity)
 
+// URLTest keeps its status verdict per node and url, shared by every test of
+// that pair, so a test holds the pair until it has read its own verdict.
+var urlTestPairs sync.Map
+
 // A test waits this long for a slot rather than being refused one: a group
 // test starts every node at once, and a big subscription exceeds the cap.
 const urlTestSlotWait = 30 * time.Second
@@ -100,22 +104,26 @@ func testProxy(proxy C.Proxy, url string, expected utils.IntRanges[uint16], time
 	defer cancel()
 
 	type result struct {
-		delay uint16
-		err   error
+		delay     uint16
+		err       error
+		satisfied bool
 	}
 	ch := make(chan result, 1)
 	go func() {
 		defer urlTestSem.Release(1)
+		pair, _ := urlTestPairs.LoadOrStore(proxy.Name()+"\n"+url, semaphore.NewWeighted(1))
+		if err := pair.(*semaphore.Weighted).Acquire(ctx, 1); err != nil {
+			ch <- result{err: err}
+			return
+		}
+		defer pair.(*semaphore.Weighted).Release(1)
 		d, e := proxy.URLTest(ctx, url, expected)
-		ch <- result{delay: d, err: e}
+		ch <- result{delay: d, err: e, satisfied: expected == nil || proxy.AliveForTestUrl(url)}
 	}()
 
 	select {
 	case r := <-ch:
-		if r.err != nil || ctx.Err() != nil || r.delay == 0 {
-			return -1
-		}
-		if expected != nil && !proxy.AliveForTestUrl(url) {
+		if r.err != nil || ctx.Err() != nil || r.delay == 0 || !r.satisfied {
 			return -1
 		}
 		return int(r.delay)
