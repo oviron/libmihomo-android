@@ -8,6 +8,7 @@ godebug default=go1.20
 
 require (
 	github.com/metacubex/mihomo v1.19.32
+	github.com/miekg/dns v1.1.63
 	golang.org/x/sync v0.23.0
 	golang.org/x/sys v0.48.0
 )
@@ -101,7 +102,6 @@ require (
 	github.com/metacubex/wireguard-go v0.0.0-20250820062549-a6cecdd7f57f // indirect
 	github.com/metacubex/yamux v0.0.0-20250918083631-dd5f17c0be49 // indirect
 	github.com/metacubex/zerotier-go v0.0.0-20260813124750-13fa6f45da5f // indirect
-	github.com/miekg/dns v1.1.63 // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
 	github.com/mroth/weightedrand/v2 v2.1.0 // indirect
 	github.com/oasisprotocol/deoxysii v0.0.0-20220228165953-2091330c22b7 // indirect
@@ -137,7 +137,7 @@ require (
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/exp v0.0.0-20240904232852-e7e105dedf7e // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.59.0 // indirect
+	golang.org/x/net v0.60.0 // indirect
 	golang.org/x/term v0.46.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
 	golang.org/x/time v0.10.0 // indirect
