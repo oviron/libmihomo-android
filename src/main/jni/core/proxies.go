@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
@@ -21,6 +22,10 @@ import (
 const urlTestSemCapacity = 256
 
 var urlTestSem = semaphore.NewWeighted(urlTestSemCapacity)
+
+// A test waits this long for a slot rather than being refused one: a group
+// test starts every node at once, and a big subscription exceeds the cap.
+const urlTestSlotWait = 30 * time.Second
 
 // allProxies returns a name->proxy snapshot that merges tunnel.Proxies() with
 // proxies exposed by all providers. Provider-supplied proxies override tunnel
@@ -48,7 +53,12 @@ func handleGetProxies() string {
 	return string(data)
 }
 
+// pickMu orders a user's pick against a group test re-seating the same group.
+var pickMu sync.Mutex
+
 func handleChangeProxy(group, name string) error {
+	pickMu.Lock()
+	defer pickMu.Unlock()
 	proxy, ok := tunnel.Proxies()[group]
 	if !ok {
 		return fmt.Errorf("group %q not found", group)
@@ -72,10 +82,18 @@ func handleAsyncTestDelay(name, url string, timeoutMs int) int {
 	if !ok {
 		return -1
 	}
+	return testProxy(proxy, url, nil, timeoutMs)
+}
+
+// testProxy passes expected through to URLTest, which still returns the delay
+// of a reply outside it and only marks the node dead for url.
+func testProxy(proxy C.Proxy, url string, expected utils.IntRanges[uint16], timeoutMs int) int {
 	if timeoutMs <= 0 {
 		timeoutMs = 5000
 	}
-	if !urlTestSem.TryAcquire(1) {
+	slotCtx, cancelSlot := context.WithTimeout(context.Background(), urlTestSlotWait)
+	defer cancelSlot()
+	if urlTestSem.Acquire(slotCtx, 1) != nil {
 		return -1
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutMs)*time.Millisecond)
@@ -88,7 +106,7 @@ func handleAsyncTestDelay(name, url string, timeoutMs int) int {
 	ch := make(chan result, 1)
 	go func() {
 		defer urlTestSem.Release(1)
-		d, e := proxy.URLTest(ctx, url, utils.IntRanges[uint16](nil))
+		d, e := proxy.URLTest(ctx, url, expected)
 		ch <- result{delay: d, err: e}
 	}()
 

@@ -236,6 +236,18 @@ func handleAction(action *Action, result ActionResult) {
 		}
 		result.success(handleAsyncTestDelay(params.ProxyName, params.TestUrl, int(params.Timeout)))
 		return
+	case testGroupsMethod:
+		s, ok := parseStringData(action.Data, &result)
+		if !ok {
+			return
+		}
+		var params TestGroupsParams
+		if err := json.Unmarshal([]byte(s), &params); err != nil {
+			result.error(err.Error())
+			return
+		}
+		result.success(handleTestGroups(params.GroupNames, params.TestUrl, int(params.Timeout)))
+		return
 	case probeCurrentProxyIpMethod:
 		modeHint, _ := action.Data.(string)
 		result.success(handleProbeCurrentProxyIp(modeHint))

@@ -134,10 +134,10 @@ jobs:
           CGO_ENABLED: '1'
           CC: ${{ env.ANDROID_NDK_PATH }}/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android21-clang
 
-      # dnsquery has no build tags, so it tests on the host.
+      # These packages have no build tags, so they test on the host.
       - name: go test (host-testable packages)
         working-directory: src/main/jni/core
-        run: go test -race ./dnsquery/
+        run: go test -race ./dnsquery/ ./selection/ ./grouptest/
 
       - name: Build libclash.so for all ABIs
         env:
