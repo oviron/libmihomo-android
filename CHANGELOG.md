@@ -8,6 +8,25 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.9] — 2026-10-14
+
+### Added
+- `testGroups` action: tests the named groups and every group nested in them
+  at once, each under its own test URL; a parent tests a nested group only
+  after that group re-picked. An unpinned `url-test` group is then seated on its
+  fastest member: a test the user asked for skips the tolerance, which still
+  keeps background health checks from flapping. A pin stays, unlike mihomo's
+  REST `/group/{name}/delay`, which clears it, and so does a pin set while the
+  test runs. A reply outside the group's `expected-status` counts as a failure.
+  Each group reports as it finishes through a `groupDelay` event; the action
+  returns all delays, with a nested group's leaf given the delay its parent
+  picked by.
+
+### Changed
+- A delay test waits up to 30 s for one of the 256 test slots instead of
+  failing at once, so a group test over a big subscription does not report
+  false timeouts.
+
 ## [0.3.8] — 2026-10-13
 
 ### Fixed

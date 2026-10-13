@@ -49,6 +49,12 @@ type ChangeProxyParams struct {
 	ProxyName *string `json:"proxy-name"`
 }
 
+type TestGroupsParams struct {
+	GroupNames []string `json:"group-names"`
+	TestUrl    string   `json:"test-url"`
+	Timeout    int64    `json:"timeout"`
+}
+
 type TestDelayParams struct {
 	ProxyName string `json:"proxy-name"`
 	TestUrl   string `json:"test-url"`
@@ -95,6 +101,7 @@ const (
 	getProxiesMethod               Method = "getProxies"
 	changeProxyMethod              Method = "changeProxy"
 	testDelayMethod                Method = "testDelay"
+	testGroupsMethod               Method = "testGroups"
 	probeCurrentProxyIpMethod      Method = "probeCurrentProxyIp"
 	queryExternalProvidersMethod   Method = "queryExternalProviders"
 	getExternalProviderMethod      Method = "getExternalProvider"
@@ -129,4 +136,5 @@ type Message struct {
 const (
 	LogMessage         MessageType = "log"
 	ConnectionsMessage MessageType = "connections"
+	GroupDelayMessage  MessageType = "groupDelay"
 )
