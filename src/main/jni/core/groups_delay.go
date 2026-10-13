@@ -77,6 +77,13 @@ func handleTestGroups(names []string, defaultURL string, timeoutMs int) string {
 		members := g.Proxies()
 		expected, _ := utils.NewUnsignedRanges[uint16](expectedStatusOf(name))
 		delays := testMembers(members, url, expected, timeoutMs, await)
+		// mihomo picks by its shared alive flag, which a reply outside
+		// expected-status clears; showing and seating by it keeps us in step.
+		for _, m := range members {
+			if !m.AliveForTestUrl(url) {
+				delays[m.Name()] = -1
+			}
+		}
 		memberNames := make([]string, len(members))
 		found := make([]GroupDelay, 0, 2*len(members))
 		for i, m := range members {
