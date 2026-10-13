@@ -9,6 +9,7 @@ import (
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
 	"github.com/metacubex/mihomo/common/utils"
 	C "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/tunnel"
 	"github.com/oviron/libmihomo-android/grouptest"
 )
 
@@ -28,7 +29,8 @@ type groupState struct {
 // parent testing a nested group only after it re-picked, and seats each
 // unpinned url-test group on its fastest member, skipping the tolerance.
 func handleTestGroups(names []string, defaultURL string, timeoutMs int) string {
-	proxies := allProxies()
+	// Groups live in tunnel.Proxies(); a provider node of the same name must not hide one.
+	proxies := tunnel.Proxies()
 	groupOf := func(name string) (outboundgroup.ProxyGroup, bool) {
 		p, ok := proxies[name]
 		if !ok {
