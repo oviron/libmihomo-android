@@ -8,6 +8,21 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.8] — 2026-10-13
+
+### Fixed
+- Unpinning a node in a `url-test` or `fallback` group. The host app clears a
+  pin by selecting the empty name, which went to mihomo's `Set()`; that
+  resolves a name among the members and refuses `""` with `proxy not exist`,
+  so the group stayed on the pinned node until the core restarted. An empty
+  name now goes through `ForceSet("")`, the same split mihomo uses in its own
+  REST handlers. A `Selector` group is unaffected: it never pins.
+
+### Security
+- `golang.org/x/net` v0.59.0 -> v0.60.0, which carries the HTTP/2 fixes from
+  GO-2026-6610, -6611, -6612 and -6617. Built against Go 1.27.2 or newer, the
+  core now scans clean.
+
 ## [0.3.7] — 2026-10-04
 
 ### Added

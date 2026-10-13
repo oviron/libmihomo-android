@@ -13,6 +13,7 @@ import (
 	"github.com/metacubex/mihomo/component/profile/cachefile"
 	C "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/tunnel"
+	"github.com/oviron/libmihomo-android/selection"
 	"golang.org/x/sync/semaphore"
 )
 
@@ -56,7 +57,7 @@ func handleChangeProxy(group, name string) error {
 	if !ok {
 		return fmt.Errorf("group %q is not selectable", group)
 	}
-	if err := selector.Set(name); err != nil {
+	if err := selection.Apply(selector, name); err != nil {
 		return err
 	}
 	cachefile.Cache().SetSelected(proxy.Name(), name)
