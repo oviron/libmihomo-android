@@ -12,12 +12,14 @@ import "C"
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"sync/atomic"
 	"time"
 	"unsafe"
 
 	"github.com/metacubex/mihomo/log"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 )
 
@@ -29,7 +31,7 @@ const (
 )
 
 // Per-sink levels are decoupled from mihomo's global log.Level() (which only
-// gates logrus stdout).
+// gates logrus stdout, which init discards).
 var (
 	logcatLevel atomic.Int32
 	fileLevel   atomic.Int32
@@ -56,6 +58,9 @@ func init() {
 	fileLevel.Store(int32(log.WARNING))
 
 	probeLogcat()
+	// mihomo also prints each event through logrus to stdout, which captureStdFd
+	// would log a second time; the subscription below already carries them.
+	logrus.SetOutput(io.Discard)
 	go subscribeMihomo()
 	captureStdFd(1)
 	captureStdFd(2)

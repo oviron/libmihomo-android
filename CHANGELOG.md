@@ -8,6 +8,11 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+### Fixed
+- Each mihomo log line reached logcat twice (and the log file, at info level), once under
+  `libclash` and again under `libclash-stderr`: mihomo also prints it to stdout
+  through logrus. That copy is now discarded.
+
 ### Changed
 - `startTUN` takes ownership of the fd and `stopTun` closes it: pass
   `ParcelFileDescriptor.detachFd()`. A consumer that kept the descriptor got a
