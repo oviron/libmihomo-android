@@ -8,6 +8,8 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.11] — 2026-10-14
+
 ### Fixed
 - Each mihomo log line reached logcat twice (and the log file, at info level), once under
   `libclash` and again under `libclash-stderr`: mihomo also prints it to stdout
