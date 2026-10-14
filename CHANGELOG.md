@@ -8,6 +8,12 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.10] — 2026-10-14
+
+### Changed
+- Bumped `golang.org/x/sys` to `0.49.0` and `golang.org/x/sync` to `0.24.0`.
+  The bundled mihomo stays on `v1.19.32`, the latest release.
+
 ## [0.3.9] — 2026-10-14
 
 ### Added
