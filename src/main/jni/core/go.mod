@@ -9,7 +9,7 @@ godebug default=go1.20
 require (
 	github.com/metacubex/mihomo v1.19.32
 	github.com/miekg/dns v1.1.63
-	golang.org/x/sync v0.23.0
+	golang.org/x/sync v0.24.0
 	golang.org/x/sys v0.49.0
 )
 
