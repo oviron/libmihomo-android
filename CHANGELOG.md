@@ -12,6 +12,10 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 - `startTUN` takes ownership of the fd and `stopTun` closes it: pass
   `ParcelFileDescriptor.detachFd()`. A consumer that kept the descriptor got a
   silent fdsan abort on `stopTun` ([#17](https://github.com/oviron/libmihomo-android/issues/17)).
+- Bumped `google.golang.org/protobuf` to `v1.36.12` (and `github.com/google/go-cmp`
+  to `v0.7.0` with it). Under Go 1.26+ the old protobuf kept every exported method
+  in the binary (golang/protobuf#1704); `libclash.so` shrinks by ~7 MB per ABI,
+  arm64 50.4 → 43.5 MB.
 
 ## [0.3.10] — 2026-10-14
 
