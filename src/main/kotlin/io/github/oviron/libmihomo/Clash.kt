@@ -74,6 +74,7 @@ object Clash {
         onResult: (String?) -> Unit,
     ) = quickSetup(initParams, setupParams, lambdaInvoke(onResult))
 
+    /** Takes ownership of [fd]: pass `ParcelFileDescriptor.detachFd()`, as [stopTun] closes it. */
     fun startTUN(
         fd: Int,
         cb: TunInterface,

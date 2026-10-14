@@ -8,6 +8,11 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+### Changed
+- `startTUN` takes ownership of the fd and `stopTun` closes it: pass
+  `ParcelFileDescriptor.detachFd()`. A consumer that kept the descriptor got a
+  silent fdsan abort on `stopTun` ([#17](https://github.com/oviron/libmihomo-android/issues/17)).
+
 ## [0.3.10] — 2026-10-14
 
 ### Changed
