@@ -139,6 +139,9 @@ class MyVpnService : android.net.VpnService(), TunInterface {
 }
 
 // 5. Start the TUN listener on the fd from VpnService.Builder.establish().
+//    The library owns the fd from here on and closes it in stopTun(): detach it,
+//    or the ParcelFileDescriptor closes it a second time and fdsan aborts the process.
+val tunFd = builder.establish()!!.detachFd()
 Clash.startTUN(
     fd = tunFd,
     cb = myVpnService,            // TunInterface
@@ -168,11 +171,11 @@ Lambda overloads exist for `invokeAction`, `quickSetup`, `setEventListener`, and
 
 A minimal lifecycle:
 
-1. Build a `VpnService.Builder`, call `.establish()`, get the int fd.
+1. Build a `VpnService.Builder`, call `.establish()`, and take the int fd with `detachFd()`. The library owns it from then on; do not close the `ParcelFileDescriptor` yourself.
 2. Pass the fd to `Clash.startTUN(fd, tunInterface, device, stack, address, dns, mtu)`.
 3. Register a callback via `Clash.setEventListener` to receive push events from mihomo.
 4. Drive runtime changes through `Clash.invokeAction(jsonAction, callback)`; see `src/main/jni/core/action.go` for the full action vocabulary.
-5. On shutdown: `Clash.stopTun()` first, then close the VpnService.
+5. On shutdown: `Clash.stopTun()` first (it closes the fd), then stop the VpnService.
 
 A full reference consumer is [oviron/FlClash](https://github.com/oviron/FlClash); the bridge originally lived there before this extraction.
 
@@ -186,8 +189,8 @@ A full reference consumer is [oviron/FlClash](https://github.com/oviron/FlClash)
 | `bridgeABI(): Int` | API surface version. Compare against `EXPECTED_BRIDGE_ABI`. |
 | `invokeAction(data, cb)` | Dispatches a JSON action document. Async result via `cb.onResult` or lambda. |
 | `quickSetup(initJson, setupJson, cb)` | One-shot mihomo init + profile apply. Result string (empty on success) via `cb`. |
-| `startTUN(fd, cb, device, stack, address, dns, mtu)` | Starts the TUN listener bound to `fd`. `cb` is a `TunInterface`; `mtu` is the tun MTU (<=0 falls back to 9000). |
-| `stopTun()` | Stops the TUN listener. Idempotent. |
+| `startTUN(fd, cb, device, stack, address, dns, mtu)` | Starts the TUN listener bound to `fd` and takes ownership of it (pass `detachFd()`). `cb` is a `TunInterface`; `mtu` is the tun MTU (<=0 falls back to 9000). |
+| `stopTun()` | Stops the TUN listener and closes its fd. Idempotent. |
 | `setEventListener(cb)` | Registers a push-event sink. Pass `null` to clear. |
 | `getTraffic(): String` | Current bytes/sec snapshot (JSON). |
 | `getTotalTraffic(): String` | Total bytes since process start (JSON). |
