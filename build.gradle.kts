@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 
 plugins {
     id("com.android.library") version "8.13.2"
-    id("org.jetbrains.kotlin.android") version "2.4.20"
+    id("org.jetbrains.kotlin.android") version "2.4.21"
 }
 
 android {
