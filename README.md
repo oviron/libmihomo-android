@@ -38,6 +38,7 @@ Which mihomo core each wrapper release bundles. The wrapper version is an indepe
 
 | Wrapper | mihomo core | bridgeABI |
 |---|---|---|
+| `v0.3.12` | `v1.19.33` | 3 |
 | `v0.3.11` | `v1.19.32` | 3 |
 | `v0.3.10` | `v1.19.32` | 3 |
 | `v0.3.9` | `v1.19.32` | 3 |
