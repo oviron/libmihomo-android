@@ -8,6 +8,23 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.12] — 2026-10-26
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.32` → `v1.19.33` (11 upstream commits). Security: CVE-2026-97031 in
+  crypto/tls, fixed through `metacubex/tls` `0.1.8` → `0.1.9`. The client-path
+  fixes: a URL test that answers in under a millisecond is no longer reported
+  as a failure, DoH dials the query already gave up on no longer pile up, the
+  fake-ip pool keeps its allocation state across a reload, and the
+  dialer-proxy cycle check no longer takes quadratic time and memory.
+  WireGuard now sets up its device and stack lazily. Additive: a `dns-mode`
+  option for tun. Dependencies that come along: `sing-tun` `0.4.27` →
+  `0.4.28`, `mieru` `3.38.0` → `3.38.1`, plus `mipstack` and
+  `sing-wireguard`. A source-mode `govulncheck` of the android/arm64 build
+  reports nothing reachable. JNI/facade surface and `bridgeABI` (`3`)
+  unchanged; all three ABIs rebuild clean and export the expected 11 symbols.
+
 ## [0.3.11] — 2026-10-14
 
 ### Fixed
