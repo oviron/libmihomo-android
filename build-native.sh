@@ -27,6 +27,11 @@ GO_TAGS="${GO_TAGS:-with_gvisor,cmfa,no_tailscale,no_easytier}"
 # deterministic .so — same source SHA → same artifact SHA → no surprise
 # divergence between a contributor's local rebuild and the GitHub Release.
 GO_LDFLAGS="${GO_LDFLAGS:--w -s -buildid=}"
+# DT_SONAME lets libmihomo-jni.so's DT_NEEDED libclash.so bind to the copy
+# already loaded from the dir passed to Clash.load. Without it Android (target
+# 23+) searches the app's native library dir and maps the APK copy as a second
+# Go runtime, so a core loaded from elsewhere never served a call.
+SONAME_LDFLAGS="-extldflags=-Wl,-soname,libclash.so"
 ABIS="${ABIS:-arm64-v8a armeabi-v7a x86_64}"
 # Fixed epoch for clang/objcopy timestamps. Same value across all rebuilds.
 export SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-1700000000}"
@@ -78,7 +83,7 @@ for abi in $ABIS; do
             CC="$cc" CFLAGS="-O3 -Werror" \
             go build \
                 -trimpath \
-                -ldflags="$GO_LDFLAGS" \
+                -ldflags="$GO_LDFLAGS $SONAME_LDFLAGS" \
                 -tags="$GO_TAGS" \
                 -buildmode=c-shared \
                 -o "$repo_root/$out_dir/libclash.so" \

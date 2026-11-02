@@ -8,6 +8,17 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.13] — 2026-11-02
+
+### Fixed
+- A `libclash.so` loaded from a directory other than the app's native library
+  dir never served a call. It had no `DT_SONAME`, so on Android (target SDK 23+)
+  the `DT_NEEDED libclash.so` of `libmihomo-jni.so` did not match it, and the
+  linker mapped the APK copy as a second Go runtime and bound the JNI shim to
+  that. `libclash.so` now carries `DT_SONAME libclash.so`, and
+  `Clash.load(dir)` runs the core from `dir`. Same mihomo `v1.19.33`, JNI/facade
+  surface and `bridgeABI` (`3`).
+
 ## [0.3.12] — 2026-10-26
 
 ### Changed
