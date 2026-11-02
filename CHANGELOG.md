@@ -8,6 +8,28 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.13] — 2026-11-02
+
+### Changed
+- TLS fingerprints now come from [oviron/utls](https://github.com/oviron/utls)
+  `v1.9.0-oviron.1` in place of `metacubex/utls` `v1.8.8`: the MetaCubeX
+  `v1.9.0-mod-meta` branch plus a Firefox 158 parrot, the same library
+  [oviron/mihomo](https://github.com/oviron/mihomo) builds with.
+  `client-fingerprint: firefox` now sends the ClientHello of current Firefox
+  stable in normal browsing mode, with an X25519MLKEM768 key share; before, it
+  was Firefox 120 without a post-quantum key share. Over REALITY, mihomo sends
+  that key share only with `reality-opts.support-x25519mlkem768: true`, as
+  before. `chrome` (Chrome 133) and `firefox120` send the same ClientHello as
+  before; `safari` moves from Safari 16 to Safari 26.3 with the 1.9 branch, and
+  `random`, which picks chrome, safari, ios or firefox once per process, picks
+  up the new `safari` and `firefox`. The bundled mihomo core stays `v1.19.33`;
+  JNI/facade surface and `bridgeABI` (`3`) unchanged.
+
+### Fixed
+- Fingerprints that offer X25519 and P-256 key shares, such as `firefox120`,
+  now finish the handshake when the server picks P-256 instead of failing
+  (refraction-networking/utls#433).
+
 ## [0.3.12] — 2026-10-26
 
 ### Changed
