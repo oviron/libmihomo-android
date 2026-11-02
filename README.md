@@ -38,6 +38,7 @@ Which mihomo core each wrapper release bundles. The wrapper version is an indepe
 
 | Wrapper | mihomo core | bridgeABI |
 |---|---|---|
+| `v0.3.13` | `v1.19.33` | 3 |
 | `v0.3.12` | `v1.19.33` | 3 |
 | `v0.3.11` | `v1.19.32` | 3 |
 | `v0.3.10` | `v1.19.32` | 3 |
@@ -185,7 +186,7 @@ A full reference consumer is [oviron/FlClash](https://github.com/oviron/FlClash)
 
 | Method | Effect |
 |---|---|
-| `load(nativeLibDir)` | Loads `libclash.so` + `libmihomo-jni.so` from the given directory. Must be called once before any other method. |
+| `load(nativeLibDir)` | Loads `libclash.so` + `libmihomo-jni.so` from the given directory. Must be called once before any other method. Before `v0.3.13` the shim bound to the `libclash.so` in the app's native library dir whatever the directory. |
 | `isLoaded(): Boolean` | True once `load` succeeded. |
 | `assertReady()` | Throws `IllegalStateException` if `load` failed or was never called. |
 | `bridgeABI(): Int` | API surface version. Compare against `EXPECTED_BRIDGE_ABI`. |
