@@ -144,3 +144,7 @@ require (
 	golang.org/x/tools v0.49.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
+
+// Firefox 158 parrot, same uTLS as oviron/mihomo: `firefox` gets X25519MLKEM768.
+// A replace in a dependency does not reach this module, so it is repeated here.
+replace github.com/metacubex/utls => github.com/oviron/utls v1.9.0-oviron.1
