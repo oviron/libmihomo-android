@@ -8,7 +8,8 @@ which any successor can rotate.
 ## Build environment
 
 - **Go**: CI and the release pipeline both pin 1.27 via `GO_VERSION` in
-  `.github/workflows/{ci,release}.yml`. Go supports only the two newest major
+  `.github/workflows/{ci,release}.yml`, with `check-latest` so each run takes
+  the newest 1.27 patch rather than the runner's cached one. Go supports only the two newest major
   releases, so bump this when 1.29 ships (≈ August 2027). `go.mod` declares
   `go 1.26.0` (the floor current `golang.org/x/*` requires) but pins
   `godebug default=go1.20`, the level upstream mihomo declares, so runtime

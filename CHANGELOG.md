@@ -8,6 +8,35 @@ Until v1.0 the public API is considered unstable; breaking changes bump
 
 ## [Unreleased]
 
+## [0.3.14] — 2026-11-15
+
+### Changed
+- Bumped bundled [metacubex/mihomo](https://github.com/MetaCubeX/mihomo)
+  `v1.19.33` → `v1.19.34` (17 upstream commits). uTLS moves from
+  `metacubex/utls` `v1.8.8` to `v1.9.0-alpha.1`: `client-fingerprint: firefox`
+  now sends the Firefox 148 ClientHello with an X25519MLKEM768 key share
+  instead of Firefox 120 without one, and `safari` moves from Safari 16 to
+  Safari 26.3. `chrome` (Chrome 133) and `firefox120` are unchanged. Over
+  REALITY the post-quantum key share is still sent only with
+  `reality-opts.support-x25519mlkem768: true`. The client-path fixes: TCP Fast
+  Open works again on Go 1.26.9+ / 1.27.2+ (this library builds with 1.27),
+  data an HTTP proxy sends along with its CONNECT response is no longer
+  dropped, cached data is drained before reading upstream, SSH outbounds close
+  when the underlying write fails, and a SOCKS domain length can no longer
+  overflow. Additive: Snell v6. Dependencies that come along: `sing` `0.5.8` →
+  `0.5.9`, `sing-tun` `0.4.28` → `0.4.29`, `mieru` `3.38.1` → `3.39.0`,
+  `tfo-go`.
+- Bumped `github.com/andybalholm/brotli` `v1.1.1` → `v1.2.8` and
+  `github.com/klauspost/compress` `v1.17.9` → `v1.20.4` ahead of mihomo, for
+  GO-2026-6888 (unbounded allocation on a crafted brotli stream) and
+  GO-2026-6865 (panic on two-block frames), both reachable from the bridge.
+- CI and the release take the newest Go 1.27 patch (`check-latest`) instead of
+  the runner's cached one; the previous release was built with 1.27.3, which
+  lacks the GO-2026-6859 `net/http` fix.
+
+JNI/facade surface and `bridgeABI` (`3`) unchanged; all three ABIs rebuild
+clean and export the expected 11 symbols.
+
 ## [0.3.13] — 2026-11-02
 
 ### Fixed
