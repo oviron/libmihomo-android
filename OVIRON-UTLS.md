@@ -43,7 +43,8 @@ As of `v0.3.14-oviron.3`, compared with `v0.3.14` (`metacubex/mihomo`
   The keys, their Xray-core JSON names and what was tested are in the
   [Xray-core parity](https://github.com/oviron/mihomo/blob/oviron/FORK.md#xray-core-parity)
   section of oviron/mihomo. On Android `xicmp` has only its `dgram` mode (no
-  root); that mode is tested on Linux, not on a device.
+  root); it was run as an ordinary user on an Android 15 emulator, not inside
+  a VPN app on a device.
 - `testseed` for VLESS with `flow: xtls-rprx-vision` pads the way Xray-core
   does: without it blocks of 900 bytes and more, such as a post-quantum inner
   ClientHello, go out unpadded. The fix is off until the key is set, for
