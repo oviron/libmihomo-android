@@ -1,12 +1,15 @@
 # oviron-utls release line
 
 Branch `oviron-utls` builds this library against
-[oviron/utls](https://github.com/oviron/utls) in place of `metacubex/utls`: the
-MetaCubeX `v1.9.0-mod-meta` branch plus a Firefox 158 parrot, the same library
-[oviron/mihomo](https://github.com/oviron/mihomo) builds with. The branch is one
-commit on top of a main-line release tag: a `replace` in
-`src/main/jni/core/go.mod` and this file. A replace in a dependency does not
-reach this module, so building against oviron/mihomo would not be enough.
+[oviron/mihomo](https://github.com/oviron/mihomo) and
+[oviron/utls](https://github.com/oviron/utls) in place of `metacubex/mihomo`
+and `metacubex/utls`: the same mihomo release plus the `chrome155`
+fingerprint name, and the MetaCubeX `v1.9.0-mod-meta` branch plus Firefox 158
+and Chrome 155 parrots. The branch sits on a main-line
+release tag, and its commits change only two `replace` lines in
+`src/main/jni/core/go.mod`, `go.sum` and this file. A
+replace in a dependency does not reach this module, so the uTLS replace is
+repeated here rather than inherited from oviron/mihomo.
 
 Everything else is the main-line release underneath: the bundled mihomo core,
 the JNI/facade surface and `bridgeABI`. The main line (`main`, plain `vX.Y.Z`
@@ -17,14 +20,20 @@ file is the changelog of the line.
 
 | Tag | Main-line base | mihomo core | uTLS | bridgeABI |
 |---|---|---|---|---|
+| `v0.3.14-oviron.2` | `v0.3.14` | `oviron/mihomo` `v1.19.34-oviron.2` | `oviron/utls` `v1.9.0-oviron.3` | 3 |
 | `v0.3.14-oviron.1` | `v0.3.14` | `v1.19.34` | `oviron/utls` `v1.9.0-oviron.2` | 3 |
 | `v0.3.13-oviron.1` | `v0.3.13` | `v1.19.33` | `oviron/utls` `v1.9.0-oviron.1` | 3 |
 | `v0.3.12-oviron.1` | `v0.3.12` | `v1.19.33` | `oviron/utls` `v1.9.0-oviron.1` | 3 |
 
 ## What differs from the main line
 
-As of `v0.3.14-oviron.1`, compared with `v0.3.14` (`metacubex/utls`
+As of `v0.3.14-oviron.2`, compared with `v0.3.14` (`metacubex/utls`
 `v1.9.0-alpha.1`):
+
+### Added
+- `client-fingerprint: chrome155` sends the ClientHello of Chrome 155 on macOS
+  with an X25519MLKEM768 key share, as captured by refraction-networking/utls;
+  the default fingerprint of Xray-core v26.11.9. `chrome` stays Chrome 133.
 
 ### Changed
 - `client-fingerprint: firefox` sends the ClientHello of current Firefox stable
@@ -85,7 +94,7 @@ carries the fork:
 
 ```sh
 go version -m src/main/jniLibs/arm64-v8a/libclash.so | grep utls
-# Expected: => github.com/oviron/utls v1.9.0-oviron.2
+# Expected: => github.com/oviron/utls v1.9.0-oviron.3, and => github.com/oviron/mihomo
 ```
 
 Update the table and the comparison above, amend the commit, and publish.
@@ -100,9 +109,10 @@ git tag vNEW-oviron.1
 git push origin vNEW-oviron.1
 ```
 
-Earlier tags keep the commits they point at. A new oviron/utls release on the
-same base goes the same way: change the `replace`, `go mod tidy`, amend, and tag
-the next `-oviron.<n>`.
+Earlier tags keep the commits they point at. A new oviron/utls or oviron/mihomo
+release on the same base is a new commit on the branch: change the `replace`,
+`go mod tidy`, rebuild, commit, push, and tag the next `-oviron.<n>` once CI is
+green.
 
 When the main line moves to a `metacubex/utls` with a Firefox 158 parrot of its
 own, the line is no longer needed.

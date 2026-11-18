@@ -145,6 +145,9 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 )
 
-// Firefox 158 parrot, same uTLS as oviron/mihomo: `firefox` gets X25519MLKEM768.
-// A replace in a dependency does not reach this module, so it is repeated here.
-replace github.com/metacubex/utls => github.com/oviron/utls v1.9.0-oviron.2
+// Firefox 158 and Chrome 155 parrots, same uTLS as oviron/mihomo. A replace in a
+// dependency does not reach this module, so it is repeated here.
+replace github.com/metacubex/utls => github.com/oviron/utls v1.9.0-oviron.3
+
+// mihomo with the `chrome155` client-fingerprint name.
+replace github.com/metacubex/mihomo => github.com/oviron/mihomo v1.19.34-oviron.2
