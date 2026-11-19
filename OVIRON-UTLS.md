@@ -4,9 +4,9 @@ Branch `oviron-utls` builds this library against
 [oviron/mihomo](https://github.com/oviron/mihomo) and
 [oviron/utls](https://github.com/oviron/utls) in place of `metacubex/mihomo`
 and `metacubex/utls`: the same mihomo release plus the `chrome155`
-fingerprint name and the client side of what an Xray-core 26.11.9 server offers,
-and the MetaCubeX `v1.9.0-mod-meta` branch plus Firefox 158 and Chrome 155
-parrots. The branch sits on a main-line
+fingerprint name and a few fixes of compatibility with Xray-core 26.11.9
+servers, and the MetaCubeX `v1.9.0-mod-meta` branch plus Firefox 158 and
+Chrome 155 parrots. The branch sits on a main-line
 release tag, and its commits change only two `replace` lines in
 `src/main/jni/core/go.mod`, `go.sum` and this file. A
 replace in a dependency does not reach this module, so the uTLS replace is
@@ -21,7 +21,8 @@ file is the changelog of the line.
 
 | Tag | Main-line base | mihomo core | uTLS | bridgeABI |
 |---|---|---|---|---|
-| `v0.3.14-oviron.3` | `v0.3.14` | `oviron/mihomo` `v1.19.34-oviron.3` | `oviron/utls` `v1.9.0-oviron.3` | 3 |
+| `v0.3.14-oviron.4` | `v0.3.14` | `oviron/mihomo` `v1.19.34-oviron.4` | `oviron/utls` `v1.9.0-oviron.3` | 3 |
+| `v0.3.14-oviron.3` (full) | `v0.3.14` | `oviron/mihomo` `v1.19.34-oviron.3` | `oviron/utls` `v1.9.0-oviron.3` | 3 |
 | `v0.3.14-oviron.2` | `v0.3.14` | `oviron/mihomo` `v1.19.34-oviron.2` | `oviron/utls` `v1.9.0-oviron.3` | 3 |
 | `v0.3.14-oviron.1` | `v0.3.14` | `v1.19.34` | `oviron/utls` `v1.9.0-oviron.2` | 3 |
 | `v0.3.13-oviron.1` | `v0.3.13` | `v1.19.33` | `oviron/utls` `v1.9.0-oviron.1` | 3 |
@@ -29,36 +30,26 @@ file is the changelog of the line.
 
 ## What differs from the main line
 
-As of `v0.3.14-oviron.3`, compared with `v0.3.14` (`metacubex/mihomo`
+As of `v0.3.14-oviron.4`, compared with `v0.3.14` (`metacubex/mihomo`
 `v1.19.34`, `metacubex/utls` `v1.9.0-alpha.1`):
 
 ### Added
-- The client side of an Xray-core 26.11.9 server, new proxy keys in the YAML
-  config: `finalmask` (`fragment`, `noise`, `sudoku`, `xmc`, `header-custom`,
-  `salamander`, `udphop`, `xdns`, `xicmp`, `realm`, `mkcp-legacy`,
-  `quic-params`), `mux` (Mux.Cool), MASQUE over HTTP/3 and HTTP/2, `reverse`
-  for VLESS, `network: xdrive`, `network: kcp` and `network: hysteria` for
-  VLESS and Trojan, XHTTP for VMess and Trojan, `stream-settings` for
-  Shadowsocks, SOCKS5 and HTTP, `sockopt`, `reality-opts.mldsa65-verify`.
-  The keys, their Xray-core JSON names and what was tested are in the
-  [Xray-core parity](https://github.com/oviron/mihomo/blob/oviron/FORK.md#xray-core-parity)
-  section of oviron/mihomo. On Android `xicmp` has only its `dgram` mode (no
-  root); it was run as an ordinary user on an Android 15 emulator, not inside
-  a VPN app on a device.
 - `testseed` for VLESS with `flow: xtls-rprx-vision` pads the way Xray-core
   does: without it blocks of 900 bytes and more, such as a post-quantum inner
   ClientHello, go out unpadded. The fix is off until the key is set, for
   example `testseed: [900, 500, 900, 256]`.
+- `reality-opts.client-version` and `grpc-opts.authority`, see
+  [Xray-core compatibility](https://github.com/oviron/mihomo/blob/oviron/FORK.md#xray-core-compatibility)
+  in oviron/mihomo.
 - `client-fingerprint: chrome155` sends the ClientHello of Chrome 155 on macOS
   with an X25519MLKEM768 key share, as captured by refraction-networking/utls;
   the default fingerprint of Xray-core v26.11.9. `chrome` stays Chrome 133.
 
 ### Changed
-- What oviron/mihomo changes without a new key is listed in
-  [What changed without a key](https://github.com/oviron/mihomo/blob/oviron/FORK.md#what-changed-without-a-key):
-  among them `random` over REALITY with the post-quantum key share no longer
-  picks a fingerprint without it.
-- The core is 2.0 MB larger per ABI (arm64-v8a: 43.8 → 45.8 MB).
+- XHTTP reads the defaults of its padding obfuscation keys and a `?query` in
+  the path the way Xray-core does; `?ed=N` in an HTTPUpgrade path turns on
+  fast open; `random` over REALITY with the post-quantum key share no longer
+  picks `ios`, which has none.
 - `client-fingerprint: firefox` sends the ClientHello of current Firefox stable
   (Firefox 158) in normal browsing mode; the main line sends Firefox 148. Both
   carry an X25519MLKEM768 key share. Firefox 158 also sends a 240-byte GREASE
@@ -70,9 +61,30 @@ As of `v0.3.14-oviron.3`, compared with `v0.3.14` (`metacubex/mihomo`
   or firefox once per process, picks up the newer `firefox`.
 
 ### Fixed
+- The SOCKS5 outbound fails a request the server rejected instead of going on
+  with a garbage address. VLESS `encryption` bounds a record by 16640 bytes
+  like Xray-core, not by 17000.
 - Fingerprints that offer X25519 and P-256 key shares, such as `firefox`,
   `firefox120`, finish the handshake when the server picks P-256 instead of
   failing (refraction-networking/utls#433).
+
+## The full core
+
+`v0.3.14-oviron.3` is the one release of the line built on the full line of
+oviron/mihomo: besides the above it carries the client side of everything
+else an Xray-core 26.11.9 server offers, new proxy keys in the YAML config:
+`finalmask` (`fragment`, `noise`, `sudoku`, `xmc`, `header-custom`,
+`salamander`, `udphop`, `xdns`, `xicmp`, `realm`, `mkcp-legacy`,
+`quic-params`), `mux` (Mux.Cool), MASQUE over HTTP/3 and HTTP/2, `reverse`
+for VLESS, `network: xdrive`, `network: kcp` and `network: hysteria` for
+VLESS and Trojan, XHTTP for VMess and Trojan, `stream-settings` for
+Shadowsocks, SOCKS5 and HTTP, `sockopt`, `reality-opts.mldsa65-verify`. The
+keys are in `FORK.md` of the branch
+[oviron-full](https://github.com/oviron/mihomo/blob/oviron-full/FORK.md#xray-core-parity).
+Its core is 2.0 MB larger per ABI (arm64-v8a: 45.8 MB against 43.8). On
+Android `xicmp` has only its `dgram` mode (no root); it was run as an ordinary
+user on an Android 15 emulator, not inside a VPN app on a device. A release on
+the full line of a later base is cut when one of those keys is needed.
 
 ## Tags and releases
 
