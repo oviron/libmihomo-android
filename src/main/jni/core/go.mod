@@ -129,6 +129,7 @@ require (
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
+	github.com/yuin/gopher-lua v1.1.1 // indirect
 	gitlab.com/go-extension/aes-ccm v0.0.0-20230221065045-e58665ef23c7 // indirect
 	gitlab.com/yawning/bsaes.git v0.0.0-20190805113838-0a714cd429ec // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
@@ -144,3 +145,10 @@ require (
 	golang.org/x/tools v0.49.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
+
+// Firefox 158 and Chrome 155 parrots, same uTLS as oviron/mihomo. A replace in a
+// dependency does not reach this module, so it is repeated here.
+replace github.com/metacubex/utls => github.com/oviron/utls v1.9.0-oviron.4
+
+// mihomo with the client side of an Xray-core server, the layer full of oviron/mihomo.
+replace github.com/metacubex/mihomo => github.com/oviron/mihomo v1.19.34-full.2

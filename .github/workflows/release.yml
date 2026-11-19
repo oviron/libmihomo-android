@@ -72,7 +72,7 @@ jobs:
 
       - name: Write metadata.json (bundled core version + bridgeABI)
         run: |
-          CORE=$(cd src/main/jni/core && go list -m -f '{{.Version}}' github.com/metacubex/mihomo)
+          CORE=$(cd src/main/jni/core && go list -m -f '{{if .Replace}}{{.Replace.Version}}{{else}}{{.Version}}{{end}}' github.com/metacubex/mihomo)
           ABI=$(grep -oE 'EXPECTED_BRIDGE_ABI: Int = [0-9]+' \
             src/main/kotlin/io/github/oviron/libmihomo/Clash.kt | grep -oE '[0-9]+$')
           AAR="libmihomo-android-${{ github.ref_name }}.aar"
