@@ -144,3 +144,10 @@ require (
 	golang.org/x/tools v0.49.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )
+
+// Firefox 158 and Chrome 155 parrots, same uTLS as oviron/mihomo. A replace in a
+// dependency does not reach this module, so it is repeated here.
+replace github.com/metacubex/utls => github.com/oviron/utls v1.9.0-oviron.4
+
+// mihomo with the fixes of compatibility with Xray-core servers, the layer compat of oviron/mihomo.
+replace github.com/metacubex/mihomo => github.com/oviron/mihomo v1.19.34-compat.2
