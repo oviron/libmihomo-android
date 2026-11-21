@@ -10,7 +10,7 @@ require (
 	github.com/metacubex/mihomo v1.19.34
 	github.com/miekg/dns v1.1.63
 	github.com/sirupsen/logrus v1.9.4
-	golang.org/x/sync v0.24.0
+	golang.org/x/sync v0.25.0
 	golang.org/x/sys v0.49.0
 )
 
